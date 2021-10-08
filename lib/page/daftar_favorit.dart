@@ -437,8 +437,8 @@ class _FavoriteListState extends State<FavoriteList> {
                             else if (snapshot.hasData) {
                               List<Pasien> patients = snapshot.data;
                               return Container(
-                                width: 200,
-                                height: 200,
+                                width: MediaQuery.of(context).size.width,
+                                height: 180,
                                 child: ListView.separated(
                                     separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1, height: 5),
                                     itemCount: patients.length,
@@ -447,30 +447,31 @@ class _FavoriteListState extends State<FavoriteList> {
                                       return Row(
                                         children: <Widget>[
                                           Flexible(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    selectedIndex = index;
-                                                    noRm = patient.nomorRm;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  width: 200,
-                                                  child: ListTile(
-                                                    title: Padding(
-                                                      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                                      child: Center(
-                                                          child: Text(
-                                                            patient.namaPasien,
-                                                            style: TextStyle(
-                                                                color:  selectedIndex == index ? Constant.color : Colors.black,
-                                                                fontWeight: FontWeight.bold
-                                                            ),)
-                                                      ),
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  selectedIndex = index;
+                                                  noRm = patient.nomorRm;
+                                                });
+                                              },
+                                              child: Container(
+                                                width: MediaQuery.of(context).size.width,
+                                                child: ListTile(
+                                                  title: Padding(
+                                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                                    child: Center(
+                                                      child: Text(
+                                                        patient.namaPasien,
+                                                        style: TextStyle(
+                                                          color:  selectedIndex == index ? Constant.color : Colors.black,
+                                                          fontWeight: FontWeight.bold
+                                                        )
+                                                      )
                                                     ),
                                                   ),
                                                 ),
-                                              )
+                                              ),
+                                            )
                                           )
                                         ],
                                       );

@@ -140,72 +140,72 @@ class _DoctorListState extends State<DoctorList> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Flexible(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Cari Dokter...',
-                ),
-                onChanged: onItemChanged,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Cari Dokter...',
               ),
-            )
+              onChanged: onCariDokter,
+            ),
+          )
         ),
         Container(
           color: Colors.transparent,
           height: MediaQuery.of(context).size.height*80/100,
           child: ListView.separated(
-              separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
-              itemCount: doctors.length,
-              itemBuilder: (context, index) {
-                Dokter dokter = doctors[index];
-                return Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: Image.asset("assets/images/profileAvatar.png"),
-                      ),
+            separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
+            itemCount: doctors.length,
+            itemBuilder: (context, index) {
+              Dokter dokter = doctors[index];
+              return Row(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: Image.asset("assets/images/profileAvatar.png"),
                     ),
-                    Flexible(
-                        child: SizedBox(
-                          child: InkWell(
-                            child: ListTile(
-                              trailing: user? IconButton(
-                                  onPressed: (){
-                                    if(listDokterFavorit.contains(dokter.idDokter.toString())) {
-                                      setState(() {
-                                        dokterFavoritService.deleteDokterFavorit(int.parse(idUser), dokter.idDokter);
-                                        listDokterFavorit.remove(dokter.idDokter.toString());
-                                        SharedPreferenceHelper.addFavorite(listDokterFavorit);
-                                      });
-                                    }
-                                    else {
-                                      DokterFavorit dokterFavorit = DokterFavorit(idDokter: dokter.idDokter, idUser: int.parse(idUser));
-                                      setState(() {
-                                        dokterFavoritService.addDokterFavorit(dokterFavorit);
-                                        listDokterFavorit.add(dokter.idDokter.toString());
-                                        SharedPreferenceHelper.addFavorite(listDokterFavorit);
-                                      });
-                                    }
-                                  },
-                                  icon: Icon(
-                                      Icons.favorite,
-                                      color: listDokterFavorit.contains(dokter.idDokter.toString()) ? Colors.red : Colors.grey,
-                                  )
-                              ) : Icon(Icons.favorite),
-                              title: Text(dokter.namaDokter, style: TextStyle(fontSize: 20)),
-                              subtitle: Text(dokter.spesialisasi, style: TextStyle(fontSize: 16)),
-                            ),
-                            onTap: (){_buildDetailDokterDialog(context, jadwalService, dokter);},
-                          ),
-                        )
+                  ),
+                  Flexible(
+                      child: SizedBox(
+                        child: InkWell(
+                          child: ListTile(
+                            trailing: user? IconButton(
+                              onPressed: (){
+                                if(listDokterFavorit.contains(dokter.idDokter.toString())) {
+                                  setState(() {
+                                    dokterFavoritService.deleteDokterFavorit(int.parse(idUser), dokter.idDokter);
+                                    listDokterFavorit.remove(dokter.idDokter.toString());
+                                    SharedPreferenceHelper.addFavorite(listDokterFavorit);
+                                  });
+                                }
+                                else {
+                                  DokterFavorit dokterFavorit = DokterFavorit(idDokter: dokter.idDokter, idUser: int.parse(idUser));
+                                  setState(() {
+                                    dokterFavoritService.addDokterFavorit(dokterFavorit);
+                                    listDokterFavorit.add(dokter.idDokter.toString());
+                                    SharedPreferenceHelper.addFavorite(listDokterFavorit);
+                                  });
+                                }
+                              },
+                              icon: Icon(
+                                  Icons.favorite,
+                                  color: listDokterFavorit.contains(dokter.idDokter.toString()) ? Colors.red : Colors.grey,
+                              )
+                            ) : Icon(Icons.favorite),
+                            title: Text(dokter.namaDokter, style: TextStyle(fontSize: 20)),
+                            subtitle: Text(dokter.spesialisasi, style: TextStyle(fontSize: 16)),
+                        ),
+                          onTap: (){_buildDetailDokterDialog(context, jadwalService, dokter);},
+                      ),
                     )
-                  ],
-                );
-              }
+                  )
+                ],
+              );
+            }
           ),
         )
       ],
@@ -214,7 +214,7 @@ class _DoctorListState extends State<DoctorList> {
 
   /*------------ Fungsi Search Dokter ------------*/
 
-  onItemChanged(String value) {
+  onCariDokter(String value) {
     setState(() {
       tempDoctorData = doctors.where((element) => element.namaDokter.toLowerCase().contains(value.toLowerCase())).toList();
     });
@@ -242,14 +242,14 @@ class _DoctorListState extends State<DoctorList> {
                 children: [
                   Expanded(
                     child: Container(
-                        height: 40,
-                        color: Constant.color,
-                        child: Center(
-                            child: Text(
-                                dokter.namaDokter,
-                                style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 24)
-                            )
+                      height: 40,
+                      color: Constant.color,
+                      child: Center(
+                        child: Text(
+                            dokter.namaDokter,
+                            style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 24)
                         )
+                      )
                     ),
                   ),
                 ],
@@ -267,30 +267,30 @@ class _DoctorListState extends State<DoctorList> {
                 thickness: 2,
               ),
               FutureBuilder<List<JadwalDokter>>(
-                  future: scheduleService.getJadwalDokterById(dokter.idDokter),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if(snapshot.hasData){
-                      List<JadwalDokter> schedules = snapshot.data;
-                      if(schedules.length == 0) {
-                        return Center(
-                            child: Container(
-                              width: 300,
-                              height: MediaQuery.of(context).size.height*45/100,
-                              child: Center(child: Text("Belum Ada Jadwal"))
-                            )
-                        );
-                      }
-                      return _buildListJadwal(schedules);
-                    } else {
+                future: scheduleService.getJadwalDokterById(dokter.idDokter),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if(snapshot.hasData){
+                    List<JadwalDokter> schedules = snapshot.data;
+                    if(schedules.length == 0) {
                       return Center(
                         child: Container(
-                            width: 300,
-                            height: 290,
-                            child: Center(child: Text("Terjadi Kesalahan"))
+                          width: 300,
+                          height: MediaQuery.of(context).size.height*45/100,
+                          child: Center(child: Text("Belum Ada Jadwal"))
                         )
                       );
                     }
+                    return _buildListJadwal(schedules);
+                  } else {
+                    return Center(
+                      child: Container(
+                        width: 300,
+                        height: 290,
+                        child: Center(child: Text("Terjadi Kesalahan"))
+                      )
+                    );
                   }
+                }
               ),
             ],
           ),
@@ -304,41 +304,41 @@ class _DoctorListState extends State<DoctorList> {
   Widget _buildListJadwal(List<JadwalDokter> jadwalDokter) {
    return SingleChildScrollView(
      child: Column(
-        children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).size.height*45/100,
-            width: 300,
-            child: ListView.separated(
-                separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
-                itemCount: jadwalDokter.length,
-                itemBuilder: (context, index) {
-                  JadwalDokter jadwal = jadwalDokter[index];
-                  return Column(
-                    children: [
-                      Row(
-                        children: <Widget>[
-                          Flexible(
-                              child: SizedBox(
-                                child: ListTile(
-                                  title: Center(
-                                    child: Text(
-                                      DayConverter.convertToDay(jadwal.hari),
-                                      style: TextStyle(fontWeight: FontWeight.bold)
-                                    )
-                                  ),
-                                ),
+      children: <Widget>[
+        Container(
+          height: MediaQuery.of(context).size.height*45/100,
+          width: 300,
+          child: ListView.separated(
+            separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
+            itemCount: jadwalDokter.length,
+            itemBuilder: (context, index) {
+              JadwalDokter jadwal = jadwalDokter[index];
+              return Column(
+                children: [
+                  Row(
+                    children: <Widget>[
+                      Flexible(
+                        child: SizedBox(
+                          child: ListTile(
+                            title: Center(
+                              child: Text(
+                                DayConverter.convertToDay(jadwal.hari),
+                                style: TextStyle(fontWeight: FontWeight.bold)
                               )
-                          )
-                        ],
-                      ),
-                      _buttonView(jadwal, context)
+                            ),
+                          ),
+                        )
+                      )
                     ],
-                  );
-                }
-            ),
+                  ),
+                  _buttonView(jadwal, context)
+                ],
+              );
+            }
           ),
-        ],
-      ),
+        ),
+      ],
+    ),
    );
   }
 
@@ -431,6 +431,7 @@ class _DoctorListState extends State<DoctorList> {
     List<String> value = ["2", "3", "9"];
     String kodeJadwal = "";
     String tipe = "";
+    String noRm = "";
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
     List dayList = List.generate(15, (index) => index)
         .map((value) => DateFormat('dd')
@@ -440,7 +441,7 @@ class _DoctorListState extends State<DoctorList> {
       kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari+7] + jam.substring(0,2);
     else
       kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0,2);
-    String noRm = "";
+    print(kodeJadwal);
     if (user) {
       SharedPreferenceHelper.getUser().then((value) {
         setState(() {
@@ -485,8 +486,8 @@ class _DoctorListState extends State<DoctorList> {
                             else if (snapshot.hasData) {
                               List<Pasien> patients = snapshot.data;
                               return Container(
-                                width: 200,
-                                height: 200,
+                                width: MediaQuery.of(context).size.width,
+                                height: 180,
                                 child: ListView.separated(
                                     separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1, height: 5),
                                     itemCount: patients.length,
@@ -495,30 +496,31 @@ class _DoctorListState extends State<DoctorList> {
                                       return Row(
                                         children: <Widget>[
                                           Flexible(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    selectedIndex = index;
-                                                    noRm = patient.nomorRm;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  width: 200,
-                                                  child: ListTile(
-                                                    title: Padding(
-                                                      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                                      child: Center(
-                                                          child: Text(
-                                                            patient.namaPasien,
-                                                            style: TextStyle(
-                                                                color:  selectedIndex == index ? Constant.color : Colors.black,
-                                                                fontWeight: FontWeight.bold
-                                                            ),)
-                                                      ),
+                                            child: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  selectedIndex = index;
+                                                  noRm = patient.nomorRm;
+                                                });
+                                              },
+                                              child: Container(
+                                                width: MediaQuery.of(context).size.width,
+                                                child: ListTile(
+                                                  title: Padding(
+                                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                                    child: Center(
+                                                      child: Text(
+                                                        patient.namaPasien,
+                                                        style: TextStyle(
+                                                          color:  selectedIndex == index ? Constant.color : Colors.black,
+                                                          fontWeight: FontWeight.bold
+                                                        )
+                                                      )
                                                     ),
                                                   ),
                                                 ),
-                                              )
+                                              ),
+                                            )
                                           )
                                         ],
                                       );
@@ -589,6 +591,7 @@ class _DoctorListState extends State<DoctorList> {
                                         backgroundColor: MaterialStateProperty.all<
                                             Color>(Constant.color)),
                                     onPressed: () {
+                                      print(kodeJadwal);
                                       TransaksiReq transaksi = new TransaksiReq(
                                           kodeJadwal: kodeJadwal,
                                           kodeDokter: jadwalDokter.kodeDokter,

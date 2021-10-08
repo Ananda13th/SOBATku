@@ -200,10 +200,12 @@ class ScheduleViewState extends State<ScheduleView> {
 
   showCalendar(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: dateTime,
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2025));
+      cancelText: "Batal",
+      confirmText: "OK",
+      context: context,
+      initialDate: dateTime,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 7)));
     if(picked != null && picked != now) {
       setState(() {
         txtController.text = DateFormat('dd-MM-yyyy').format(picked);
@@ -292,16 +294,17 @@ class ScheduleViewState extends State<ScheduleView> {
     List<String> value = ["2", "3", "9"];
     String kodeJadwal = "";
     String tipe = "";
+    String noRm = "";
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
     List dayList = List.generate(15, (index) => index)
         .map((value) => DateFormat('dd')
         .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
-    if(jadwalDokter.hari < now.weekday)
+    if(jadwalDokter.hari < now.weekday || now.compareTo(dateTime) == -1)
       kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari+7] + jam.substring(0,2);
     else
       kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0,2);
-    String noRm = "";
+    print(kodeJadwal);
     if (isUserExist) {
       SharedPreferenceHelper.getUser().then((value) {
         setState(() {
@@ -336,7 +339,8 @@ class ScheduleViewState extends State<ScheduleView> {
                       ),
                       FutureBuilder(
                         future: pasienService.getPairing(idUser),
-                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        builder: (BuildContext context,
+                            AsyncSnapshot snapshot) {
                           if (snapshot.hasError) {
                             return Center(
                               child: Text("Error"),
@@ -345,8 +349,8 @@ class ScheduleViewState extends State<ScheduleView> {
                           else if (snapshot.hasData) {
                             List<Pasien> patients = snapshot.data;
                             return Container(
-                              width: 200,
-                              height: 200,
+                              width: MediaQuery.of(context).size.width,
+                              height: 180,
                               child: ListView.separated(
                                   separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1, height: 5),
                                   itemCount: patients.length,
@@ -355,30 +359,31 @@ class ScheduleViewState extends State<ScheduleView> {
                                     return Row(
                                       children: <Widget>[
                                         Flexible(
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedIndex = index;
-                                                  noRm = patient.nomorRm;
-                                                });
-                                              },
-                                              child: Container(
-                                                width: 200,
-                                                child: ListTile(
-                                                  title: Padding(
-                                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                                    child: Center(
-                                                        child: Text(
-                                                          patient.namaPasien,
-                                                          style: TextStyle(
-                                                            color:  selectedIndex == index ? Constant.color : Colors.black,
-                                                            fontWeight: FontWeight.bold
-                                                          ),)
-                                                    ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                selectedIndex = index;
+                                                noRm = patient.nomorRm;
+                                              });
+                                            },
+                                            child: Container(
+                                              width: MediaQuery.of(context).size.width,
+                                              child: ListTile(
+                                                title: Padding(
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                                  child: Center(
+                                                    child: Text(
+                                                      patient.namaPasien,
+                                                      style: TextStyle(
+                                                        color:  selectedIndex == index ? Constant.color : Colors.black,
+                                                        fontWeight: FontWeight.bold
+                                                      ),
+                                                    )
                                                   ),
                                                 ),
                                               ),
-                                            )
+                                            ),
+                                          )
                                         )
                                       ],
                                     );
@@ -417,8 +422,7 @@ class ScheduleViewState extends State<ScheduleView> {
                               height: 80,
                               child: GroupButton(
                                   selectedColor: Constant.color,
-                                  selectedTextStyle: TextStyle(
-                                      color: Colors.white),
+                                  selectedTextStyle: TextStyle(color: Colors.white),
                                   spacing: 10,
                                   direction: Axis.horizontal,
                                   unselectedColor: Colors.grey[300],
