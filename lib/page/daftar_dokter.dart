@@ -55,7 +55,6 @@ class _DoctorListState extends State<DoctorList> {
 
   @override
   void initState() {
-    print("Init");
     super.initState();
     doctorService = DokterService();
     pasienService = PasienService();
@@ -92,7 +91,6 @@ class _DoctorListState extends State<DoctorList> {
 
   @override
   Widget build(BuildContext context) {
-    print("Build");
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
