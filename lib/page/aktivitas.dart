@@ -40,15 +40,15 @@ class _AktivitasState extends State<Aktivitas> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-            title: Center(child: Text("Aktivitas")),
-            backgroundColor: Constant.color,
-            bottom: const TabBar(
-              labelStyle: TextStyle(fontSize: 20),
-              tabs: [
-                Tab(text: "Aktif"),
-                Tab(text: "Riwayat"),
-              ]
-            ),
+          title: Center(child: Text("Aktivitas")),
+          backgroundColor: Constant.color,
+          bottom: const TabBar(
+            labelStyle: TextStyle(fontSize: 20),
+            tabs: [
+              Tab(text: "Aktif"),
+              Tab(text: "Riwayat"),
+            ]
+          ),
         ),
         body: TabBarView(
             children: [
@@ -95,11 +95,12 @@ class _AktivitasState extends State<Aktivitas> {
                 children: <Widget>[
                   Flexible(
                     child: Container(
-                      decoration: BoxDecoration(image:
-                      DecorationImage(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
                           image: AssetImage("assets/images/Background.png"),
                           alignment: Alignment.center,
-                          fit: BoxFit.fill)),
+                          fit: BoxFit.fill)
+                      ),
                       child: FutureBuilder(
                         future: _dataFuture,
                         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -239,5 +240,4 @@ class _AktivitasState extends State<Aktivitas> {
       },
     );
   }
-  
 }
