@@ -52,188 +52,189 @@ class SignUpState extends State<SignUp> {
             fit: BoxFit.cover
           )
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  height: screenSize.height/5,
-                  width: screenSize.width,
-                  child: Center
-                    (child: Image.asset("assets/images/LogoRs.png", fit: BoxFit.scaleDown,)
-                  )
-                ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                height: screenSize.height/6,
+                width: screenSize.width,
+                child: Center
+                  (child: Image.asset("assets/images/LogoRs.png", fit: BoxFit.scaleDown,)
+                )
               ),
-              Container(
-                width: 400,
-                height: screenSize.height/1.6,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          textInputAction: TextInputAction.next,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          controller: emailField,
-                          keyboardType: TextInputType.emailAddress,
-                          focusNode: _emailFocus,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                            icon: Icon(Icons.email),
-                            labelText: 'Email',
-                          ),
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty)
-                              return 'Mohon Isikan Alamat Email';
-                            if(!EmailValidator.validate(value)) {
-                              return 'Alamat Email Tidak Valid';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 10),
-                        TextFormField(
-                          textInputAction: TextInputAction.next,
-                          obscureText: true,
-                          controller: passwordField,
-                          focusNode: _passwordFocus,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          decoration: const InputDecoration(
-                            hintText: "6-12 Karakter",
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                            icon: Icon(Icons.password),
-                            labelText: 'Kata Sandi',
-                          ),
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Mohon Isikan Kata Sandi';
-                            }
-                            if(value.length > 12 || value.length < 6)
-                              return 'Kata Sandi 6-12 Karakter';
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 10),
-                        TextFormField(
-                          textInputAction: TextInputAction.next,
-                          controller: namaField,
-                          focusNode: _namaFocus,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                            icon: Icon(Icons.person),
-                            labelText: 'Nama Lengkap',
-                          ),
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Mohon Isikan Nama Lengkap';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 10),
-                        TextFormField(
-                          textInputAction: TextInputAction.done,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          keyboardType: TextInputType.phone,
-                          controller: noHpField,
-                          focusNode: _noHpFocus,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            border: OutlineInputBorder(),
-                            prefixIcon: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("+62",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: 400,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            textInputAction: TextInputAction.next,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            controller: emailField,
+                            keyboardType: TextInputType.emailAddress,
+                            focusNode: _emailFocus,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              icon: Icon(Icons.email),
+                              labelText: 'Email',
                             ),
-                            prefixIconConstraints:
-                            BoxConstraints(minWidth: 0, minHeight: 0),
-                            icon: Icon(Icons.phone_android),
-                            labelText: 'Nomor HP',
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty)
+                                return 'Mohon Isikan Alamat Email';
+                              if(!EmailValidator.validate(value)) {
+                                return 'Alamat Email Tidak Valid';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Mohon Isikan Nomor HP';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: (){
-                                  if (!_formKey.currentState!.validate()) {
-                                    showToast('Harap Isi Semua Data',
-                                      context: context,
-                                      textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                      backgroundColor: Colors.red,
-                                      animation: StyledToastAnimation.scale,
-                                      reverseAnimation: StyledToastAnimation.fade,
-                                      position: StyledToastPosition.center,
-                                      animDuration: Duration(seconds: 1),
-                                      duration: Duration(seconds: 4),
-                                      curve: Curves.elasticOut,
-                                      reverseCurve: Curves.linear,
-                                    );
-                                  } else {
-                                    String noHp = noHpField.text;
-                                    if(noHpField.text.substring(0,1) == "0") {
-                                      noHp= noHp.replaceFirst("0", "+62");
-                                    }
-                                    else {
-                                      noHp = "+62" + noHpField.text;
-                                    }
-                                    User user = new User(
-                                        password: passwordField.text,
-                                        namaUser: namaField.text,
-                                        nomorHp: noHp,
-                                        email: emailField.text);
-                                    userService.sendOtp(noHp);
-                                    userService.createUser(user).then((value) {
-                                      if(value) {
-                                        Navigator.of(context).pushReplacement(
-                                          new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp)));
-                                      }
-                                      else
-                                        showToast('Terjadi Kesalahan',
-                                          context: context,
-                                          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                          backgroundColor: Colors.red,
-                                          animation: StyledToastAnimation.scale,
-                                          reverseAnimation: StyledToastAnimation.fade,
-                                          position: StyledToastPosition.center,
-                                          animDuration: Duration(seconds: 1),
-                                          duration: Duration(seconds: 4),
-                                          curve: Curves.elasticOut,
-                                          reverseCurve: Curves.linear,
-                                        );
-                                      }
-                                    );
-                                  }
-                                },
-                                child: Text("DAFTAR"),
-                                style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color)),
-                              )
+                          SizedBox(height: 10),
+                          TextFormField(
+                            textInputAction: TextInputAction.next,
+                            obscureText: true,
+                            controller: passwordField,
+                            focusNode: _passwordFocus,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            decoration: const InputDecoration(
+                              hintText: "6-12 Karakter",
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              icon: Icon(Icons.password),
+                              labelText: 'Kata Sandi',
                             ),
-                          ],
-                        )
-                      ],
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Mohon Isikan Kata Sandi';
+                              }
+                              if(value.length > 12 || value.length < 6)
+                                return 'Kata Sandi 6-12 Karakter';
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 10),
+                          TextFormField(
+                            textInputAction: TextInputAction.next,
+                            controller: namaField,
+                            focusNode: _namaFocus,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              icon: Icon(Icons.person),
+                              labelText: 'Nama Lengkap',
+                            ),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Mohon Isikan Nama Lengkap';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 10),
+                          TextFormField(
+                            textInputAction: TextInputAction.done,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            keyboardType: TextInputType.phone,
+                            controller: noHpField,
+                            focusNode: _noHpFocus,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              prefixIcon: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("+62",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                              prefixIconConstraints:
+                              BoxConstraints(minWidth: 0, minHeight: 0),
+                              icon: Icon(Icons.phone_android),
+                              labelText: 'Nomor HP',
+                            ),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Mohon Isikan Nomor HP';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: (){
+                                    if (!_formKey.currentState!.validate()) {
+                                      showToast('Harap Isi Semua Data',
+                                        context: context,
+                                        textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+                                        backgroundColor: Colors.red,
+                                        animation: StyledToastAnimation.scale,
+                                        reverseAnimation: StyledToastAnimation.fade,
+                                        position: StyledToastPosition.center,
+                                        animDuration: Duration(seconds: 1),
+                                        duration: Duration(seconds: 4),
+                                        curve: Curves.elasticOut,
+                                        reverseCurve: Curves.linear,
+                                      );
+                                    } else {
+                                      String noHp = noHpField.text;
+                                      if(noHpField.text.substring(0,1) == "0") {
+                                        noHp= noHp.replaceFirst("0", "+62");
+                                      }
+                                      else {
+                                        noHp = "+62" + noHpField.text;
+                                      }
+                                      User user = new User(
+                                          password: passwordField.text,
+                                          namaUser: namaField.text,
+                                          nomorHp: noHp,
+                                          email: emailField.text);
+                                      userService.sendOtp(noHp);
+                                      userService.createUser(user).then((value) {
+                                        if(value) {
+                                          Navigator.of(context).pushReplacement(
+                                            new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp)));
+                                        }
+                                        else
+                                          showToast('Terjadi Kesalahan',
+                                            context: context,
+                                            textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+                                            backgroundColor: Colors.red,
+                                            animation: StyledToastAnimation.scale,
+                                            reverseAnimation: StyledToastAnimation.fade,
+                                            position: StyledToastPosition.center,
+                                            animDuration: Duration(seconds: 1),
+                                            duration: Duration(seconds: 4),
+                                            curve: Curves.elasticOut,
+                                            reverseCurve: Curves.linear,
+                                          );
+                                        }
+                                      );
+                                    }
+                                  },
+                                  child: Text("DAFTAR"),
+                                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color)),
+                                )
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         )
       )
     );
