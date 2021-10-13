@@ -3,6 +3,7 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:intl/intl.dart';
 import 'package:searchable_dropdown/searchable_dropdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,10 +26,14 @@ import 'helper/local_notification.dart';
 import 'model/jadwal_dokter.dart';
 import 'model/pasien.dart';
 import 'model/spesialisasi.dart';
+import 'package:android_autostart/android_autostart.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:auto_start_flutter/auto_start_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   messageHandler();
+  // initAutoStart();
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],
@@ -39,6 +44,7 @@ Future<void> main() async {
 class App extends StatelessWidget  {
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'SobatKu',
       theme: ThemeData(
@@ -124,6 +130,7 @@ class _HomeState extends State<MyApp> {
 
   @override
   void initState() {
+
     super.initState();
     //Inisialisasi Service
     jadwalService = JadwalService();
@@ -209,6 +216,21 @@ class _HomeState extends State<MyApp> {
   }
 
   void onTabTapped(int index) {
+    if(index == 1) {
+      showToast(
+        "Maaf, Fitur Belum Tersedia",
+        context: context,
+        textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+        backgroundColor: Constant.color,
+        animation: StyledToastAnimation.scale,
+        reverseAnimation: StyledToastAnimation.fade,
+        position: StyledToastPosition.center,
+        animDuration: Duration(seconds: 1),
+        duration: Duration(seconds: 4),
+        curve: Curves.elasticOut,
+        reverseCurve: Curves.linear,
+      );
+    }
     if(index!=2) {
       setState(() {_currentIndex = index;});
     }
@@ -340,10 +362,12 @@ class _HomeState extends State<MyApp> {
 
   showCalendar(BuildContext context) async {
     final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2025));
+      cancelText: "Batal",
+      confirmText: "OK",
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 7)));
     if(picked != null && picked != now) {
       setState(() {
         datePicked = picked;
@@ -428,7 +452,7 @@ class IntroScreen extends StatelessWidget {
 _saveToFirebase(String idUser, Pasien pasien) async {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   FirebaseMessaging _fcm = FirebaseMessaging.instance;
-  //Delete Semua Pasien Dahulu Agar Tidak Tertimpa Dengan Pasien Lama Yang Sudah Dihapus
+  // Delete Semua Pasien Dahulu Agar Tidak Tertimpa Dengan Pasien Lama Yang Sudah Dihapus
   var collection = await _db.collection("user").doc(idUser).collection("pasien").get();
   for(var doc in collection.docs) {
     doc.reference.delete();
@@ -436,7 +460,9 @@ _saveToFirebase(String idUser, Pasien pasien) async {
 
   //Insert Data Pasien Baru
   String fcmToken = await _fcm.getToken();
+
   if(fcmToken != null) {
+
     var tokenRef = _db
         .collection('user')
         .doc(idUser)
@@ -475,6 +501,30 @@ Future<void> _messageHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print("Handling a background message: ${message.messageId}");
 }
+
+/*------------ Ambil Informasi Perangkat ------------*/
+
+getDeviceInfo() async {
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  print(androidInfo.manufacturer);
+  return androidInfo.manufacturer;
+}
+
+/*------------ Ambil Informasi Perangkat ------------*/
+
+Future<void> initAutoStart() async {
+  try {
+    //check auto-start availability.
+    var test = await isAutoStartAvailable;
+    print(test);
+    //if available then navigate to auto-start setting page.
+    if (test) await getAutoStartPermission();
+  } on PlatformException catch (e) {
+    print(e);
+  }
+}
+
 
 
 
