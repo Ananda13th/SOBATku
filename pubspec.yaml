@@ -47,7 +47,11 @@ dependencies:
   email_validator: ^2.0.1
   pin_code_fields: ^7.3.0
   webview_flutter: ^2.0.13
-
+  pinch_zoom: ^1.0.0
+  photo_view: ^0.13.0
+  android_autostart: ^0.0.2
+  device_info_plus: ^3.0.1
+  auto_start_flutter: ^0.0.6
 dev_dependencies:
   build_runner: any
   json_serializable: any
@@ -78,7 +82,7 @@ flutter:
     - assets/icons/
     - assets/images/Akun Dr Oen 4.png
     - assets/icons/Daftar_Periksa.png
-    -  assets/images/Fast_Track.png
+    - assets/images/Fast_Track.png
     - assets/images/profileAvatar.png
 
   # The following line ensures that the Material Icons font is
