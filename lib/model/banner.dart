@@ -5,10 +5,12 @@ part 'banner.g.dart';
 class BannerModel {
   final String url;
   final String deskripsi;
+  final String keterangan;
 
   BannerModel({
     required this.url,
     required this.deskripsi,
+    required this.keterangan
   });
 
   factory BannerModel.fromJson(Map<String,dynamic> data) => _$BannerModelFromJson(data);
