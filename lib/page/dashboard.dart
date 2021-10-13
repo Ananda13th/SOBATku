@@ -1,3 +1,4 @@
+import 'package:android_autostart/android_autostart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -31,10 +32,13 @@ class HomeViewState extends State<HomeView> {
   late DokterFavoritService dokterFavoritService;
   late SpesialisasiService spesialisasiService;
   late JadwalService jadwalService;
-  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", deskripsi: "");
+  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", deskripsi: "", keterangan: "");
   late List<String> listBannerPromoTest = ["assets/images/promo1.jpeg","assets/images/promo2.jpeg", "assets/images/promo3.jpeg", "assets/images/promo4.jpeg", "assets/images/promo5.jpeg", "assets/images/promo6.jpeg"];
   late List<String> listBannerTest = ["assets/images/Banner.png"];
   late List<BannerModel> listBanner = [temp];
+  List<BannerModel> listBannerUtama = [];
+  List<BannerModel> listBannerPromo = [];
+  List<BannerModel> listBannerBerita = [];
   final CarouselController _controller = CarouselController();
 
 
@@ -47,6 +51,14 @@ class HomeViewState extends State<HomeView> {
     bannerService.getBanner().then((value) {
       setState(() {
         listBanner = value;
+        listBanner.forEach((element) {
+          if(element.keterangan == "banner")
+            listBannerUtama.add(element);
+          if(element.keterangan == "promo")
+            listBannerPromo.add(element);
+          if(element.keterangan == "berita")
+            listBannerBerita.add(element);
+        });
       });
     });
     getFavorit();
@@ -75,6 +87,7 @@ class HomeViewState extends State<HomeView> {
             body: CustomScrollView(
               slivers: <Widget>[
                 SliverAppBar(
+                  automaticallyImplyLeading: false,
                   backgroundColor: Colors.white,
                   floating: true,
                   pinned: true,
@@ -143,10 +156,13 @@ class HomeViewState extends State<HomeView> {
                       child:
                       Column(
                         children: <Widget>[
+                          SizedBox(
+                            height: 5,
+                          ),
                           Container(
                             color: Colors.transparent,
                             height: 260,
-                            child: _createCarousel(listBanner)
+                            child: _createCarousel(listBannerUtama)
                           ),
                           SizedBox(
                             height: 20,
@@ -169,7 +185,7 @@ class HomeViewState extends State<HomeView> {
                           Container(
                               color: Colors.transparent,
                               height: 200,
-                              child: gridPromoLayanan(listBanner)
+                              child: gridPromoLayanan(listBannerPromo)
                           ),
                           SizedBox(height: 20),
                           Text("Berita Kesehatan Terkini", style: TextStyle(
@@ -178,7 +194,7 @@ class HomeViewState extends State<HomeView> {
                           Container(
                               color: Colors.transparent,
                               height: 260,
-                              child: _createCarousel(listBanner)
+                              child: _createCarousel(listBannerBerita)
                           ),
                           SizedBox(height: 20),
                           Text("Hubungi dan Ikuti Kami", style: TextStyle(
@@ -204,7 +220,8 @@ class HomeViewState extends State<HomeView> {
       return Column(
         children: [
           CarouselSlider(
-            items: listBannerTest.map((item) {
+            items: bannerList.map((item) {
+            // items: listBannerTest.map((item) {
               return Builder(
                 builder: (BuildContext context) {
                   return Container(
@@ -214,10 +231,10 @@ class HomeViewState extends State<HomeView> {
                           borderRadius:  BorderRadius.circular(40.0),
                           child: InkWell(
                             onTap: (){
-                              // Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item)));
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'banner')));
                             },
-                            // child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
-                            child: Image.asset(item, fit: BoxFit.fill),
+                            child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
+                            // child: Image.asset(item, fit: BoxFit.fill),
                           )
                       )
                   );
@@ -239,7 +256,8 @@ class HomeViewState extends State<HomeView> {
           //Index Carousel
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: listBannerTest.asMap().entries.map((entry) {
+            children: bannerList.asMap().entries.map((entry) {
+            //children: listBannerTest.asMap().entries.map((entry) {
               return GestureDetector(
                 onTap: () => _controller.animateToPage(entry.key),
                 child: Container(
@@ -458,7 +476,8 @@ class HomeViewState extends State<HomeView> {
       padding: const EdgeInsets.all(20),
       scrollDirection: Axis.horizontal,
       crossAxisCount: 1,
-      children: List.generate(listBannerPromoTest.length, (index) {
+        children: List.generate(listBanner.length, (index) {
+      // children: List.generate(listBannerPromoTest.length, (index) {
         return
           Center(
             child: Container(
@@ -469,13 +488,13 @@ class HomeViewState extends State<HomeView> {
                     children: [
                       InkWell(
                         onTap: (){
-                          // Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: listBanner[index])));
+                          Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: listBanner[index], keterangan: 'Promo')));
                         },
                         child: Container(
                           width: 150,
                           height: 150,
-                          // child: Image.network(listBanner[index].url, fit: BoxFit.contain),
-                          child: Image.asset(listBannerPromoTest[index]),
+                          child: Image.network(listBanner[index].url, fit: BoxFit.contain),
+                          // child: Image.asset(listBannerPromoTest[index]),
                         ),
                       ),
                     ],
@@ -500,7 +519,7 @@ launchWhatsApp(String kategori) async {
   if(kategori == "General")
     text = "Halo, Saya Ingin Bertanya Mengenai Layanan di RS Dr Oen Solo Baru";
   final link = WhatsAppUnilink(
-    phoneNumber: '+6281804594714',
+    phoneNumber: '+6282110103388',
     text: text,
   );
   await launch('$link');
