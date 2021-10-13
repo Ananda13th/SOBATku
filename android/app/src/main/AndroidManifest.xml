@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.sobatku">
+    package="com.example.sobatku"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <queries>
         <!-- If your app opens https URLs -->
         <intent>
@@ -26,8 +29,9 @@
         </intent>
     </queries>
    <application
+       tools:replace="android:label"
         android:label="sobatku"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/logo_rs">
 
         <activity
             android:name=".MainActivity"
@@ -54,8 +58,16 @@
               android:resource="@drawable/launch_background"
               />
             <meta-data
+                android:name="com.google.firebase.messaging.default_notification_icon"
+                android:resource="@drawable/logo_rs" />
+            <!-- [END fcm_default_icon] -->
+            <!-- [START fcm_default_channel] -->
+            <meta-data
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
                 android:value="high_importance_channel" />
+            <meta-data
+                android:name="com.google.firebase.messaging.default_notification_color"
+                android:resource="@color/colorPrimary" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -67,5 +79,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-    </application>
+       <receiver
+           android:name=".MainActivityReceiver"
+           android:enabled="true"
+           android:exported="true"
+           android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+           <intent-filter>
+               <action android:name="android.intent.action.BOOT_COMPLETED" />
+               <category android:name="android.intent.category.DEFAULT" />
+           </intent-filter>
+       </receiver>
+
+   </application>
 </manifest>
