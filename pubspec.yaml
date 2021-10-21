@@ -52,6 +52,8 @@ dependencies:
   android_autostart: ^0.0.2
   device_info_plus: ^3.0.1
   auto_start_flutter: ^0.0.6
+  screen: ^0.0.5
+  flutter_countdown_timer: ^4.1.0
 dev_dependencies:
   build_runner: any
   json_serializable: any
