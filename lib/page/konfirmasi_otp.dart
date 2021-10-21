@@ -2,10 +2,14 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:intl/intl.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sobatku/helper/constant.dart';
+import 'package:sobatku/helper/shared_preferences.dart';
 import 'package:sobatku/page/sign_in.dart';
 import 'package:sobatku/service/user_service.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 
 class TampilanKonfirmasiPin extends StatefulWidget {
   final String? phoneNumber;
@@ -18,20 +22,27 @@ class TampilanKonfirmasiPin extends StatefulWidget {
 
 class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
   late UserService userService;
+  late String bannedDate;
+  bool showCountdown = false;
   TextEditingController textEditingController = TextEditingController();
-  // ..text = "123456";
+  int clicked = 0;
 
-  // ignore: close_sinks
   StreamController<ErrorAnimationType>? errorController;
 
   bool hasError = false;
   String currentText = "";
   final formKey = GlobalKey<FormState>();
 
+  int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 61;
   @override
   void initState() {
     userService = UserService();
     errorController = StreamController<ErrorAnimationType>();
+    SharedPreferenceHelper.getBannedDate().then((value) {
+      setState(() {
+        bannedDate = value;
+      });
+    });
     super.initState();
   }
 
@@ -68,15 +79,7 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
           ),
           child: ListView(
             children: <Widget>[
-              SizedBox(height: 30),
-              // Container(
-              //   height: MediaQuery.of(context).size.height / 3,
-              //   child: ClipRRect(
-              //     borderRadius: BorderRadius.circular(30),
-              //     child: Image.asset("${Constants.OTP_GIF_IMAGE}"),
-              //   ),
-              // ),
-              // SizedBox(height: 8),
+              // SizedBox(height: 30),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
@@ -160,8 +163,6 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
                       enablePinAutofill: true,
                       beforeTextPaste: (text) {
                         print("Allowing to paste $text");
-                        //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
-                        //but you can show anything you want here, like your pop up saying wrong paste format or etc
                         return true;
                       },
                     )),
@@ -179,6 +180,21 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
               SizedBox(
                 height: 20,
               ),
+              showCountdown ?
+              Center(
+                child: CountdownTimer(
+                  textStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  endTime: endTime,
+                  onEnd: () {
+                    WidgetsBinding.instance!.addPostFrameCallback((_){
+                      setState(() {
+                        showCountdown = false;
+                      });
+                    });
+                  },
+                ),
+              )
+             :
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -188,7 +204,31 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
                   ),
                   TextButton(
                     onPressed: () {
-                      userService.resendOtp(widget.phoneNumber.toString()).then((value) => snackBar(value));
+                      if(clicked == 3 || bannedDate == DateFormat("dd-MM-yyyy").format(DateTime.now()))
+                        showToast('Maaf, Sudah Melebihi Batas Permintaan Kode.\nSilahkan Hubungi Pusat Informasi',
+                          context: context,
+                          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+                          backgroundColor: Colors.red,
+                          animation: StyledToastAnimation.scale,
+                          reverseAnimation: StyledToastAnimation.fade,
+                          position: StyledToastPosition.center,
+                          animDuration: Duration(seconds: 1),
+                          duration: Duration(seconds: 4),
+                          curve: Curves.elasticOut,
+                          reverseCurve: Curves.linear,
+                        );
+                      else {
+                        userService.resendOtp(widget.phoneNumber.toString()).then((value) => snackBar(value));
+                        WidgetsBinding.instance!.addPostFrameCallback((_){
+                          setState(() {
+                            endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 61;
+                            showCountdown = true;
+                            clicked++;
+                            if(clicked == 3)
+                              SharedPreferenceHelper.addBannedDate();
+                          });
+                        });
+                      }
                     },
                     child: Text(
                       "Kirim Ulang",
