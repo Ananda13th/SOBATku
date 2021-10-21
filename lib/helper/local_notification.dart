@@ -12,13 +12,14 @@ class LocalNotification {
     // Daftar jenis notifikasi dari aplikasi.
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'high_importance_channel',
+        'default_notification_channel_id',
         'Notification',
         'All Notification is Here',
         importance: Importance.max,
         priority: Priority.high,
         ticker: 'ticker',
-        icon: "logo_rs"
+        icon: "logo_rs",
+        playSound: true,
     );
     const iOSDetails = IOSNotificationDetails();
     const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidDetails, iOS: iOSDetails);
