@@ -1,8 +1,8 @@
-import 'package:android_autostart/android_autostart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
@@ -32,7 +32,7 @@ class HomeViewState extends State<HomeView> {
   late DokterFavoritService dokterFavoritService;
   late SpesialisasiService spesialisasiService;
   late JadwalService jadwalService;
-  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", deskripsi: "", keterangan: "");
+  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", urlDetailBanner:"", deskripsi: "", keterangan: "");
   late List<String> listBannerPromoTest = ["assets/images/promo1.jpeg","assets/images/promo2.jpeg", "assets/images/promo3.jpeg", "assets/images/promo4.jpeg", "assets/images/promo5.jpeg", "assets/images/promo6.jpeg"];
   late List<String> listBannerTest = ["assets/images/Banner.png"];
   late List<BannerModel> listBanner = [temp];
@@ -40,6 +40,7 @@ class HomeViewState extends State<HomeView> {
   List<BannerModel> listBannerPromo = [];
   List<BannerModel> listBannerBerita = [];
   final CarouselController _controller = CarouselController();
+
 
 
 
@@ -52,11 +53,11 @@ class HomeViewState extends State<HomeView> {
       setState(() {
         listBanner = value;
         listBanner.forEach((element) {
-          if(element.keterangan == "banner")
+          if(element.keterangan == "Banner")
             listBannerUtama.add(element);
-          if(element.keterangan == "promo")
+          if(element.keterangan == "Promo")
             listBannerPromo.add(element);
-          if(element.keterangan == "berita")
+          if(element.keterangan == "Berita")
             listBannerBerita.add(element);
         });
       });
@@ -217,62 +218,62 @@ class HomeViewState extends State<HomeView> {
   /*------------ Carousel ------------*/
   
   Widget _createCarousel(List<BannerModel> bannerList) {
-      return Column(
-        children: [
-          CarouselSlider(
-            items: bannerList.map((item) {
-            // items: listBannerTest.map((item) {
-              return Builder(
-                builder: (BuildContext context) {
-                  return Container(
-                      width: MediaQuery.of(context).size.width,
-                      margin: EdgeInsets.symmetric(horizontal: 5.0),
-                      child: ClipRRect(
-                          borderRadius:  BorderRadius.circular(40.0),
-                          child: InkWell(
-                            onTap: (){
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'banner')));
-                            },
-                            child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
-                            // child: Image.asset(item, fit: BoxFit.fill),
-                          )
-                      )
-                  );
-                },
-              );
-            }).toList(),
-            carouselController: _controller,
-            options: CarouselOptions(
-              viewportFraction: 1,
-              autoPlay: true,
-              enlargeCenterPage: true,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  currentIndex = index;
-                });
-              }
-            ),
+    return Column(
+      children: [
+        CarouselSlider(
+          items: bannerList.map((item) {
+          // items: listBannerTest.map((item) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Container(
+                    width: MediaQuery.of(context).size.width,
+                    margin: EdgeInsets.symmetric(horizontal: 5.0),
+                    child: ClipRRect(
+                        borderRadius:  BorderRadius.circular(15.0),
+                        child: InkWell(
+                          onTap: (){
+                            Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'Banner')));
+                          },
+                          child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
+                          // child: Image.asset(item, fit: BoxFit.fill),
+                        )
+                    )
+                );
+              },
+            );
+          }).toList(),
+          carouselController: _controller,
+          options: CarouselOptions(
+            viewportFraction: 1,
+            autoPlay: true,
+            enlargeCenterPage: true,
+            onPageChanged: (index, reason) {
+              setState(() {
+                currentIndex = index;
+              });
+            }
           ),
-          //Index Carousel
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: bannerList.asMap().entries.map((entry) {
-            //children: listBannerTest.asMap().entries.map((entry) {
-              return GestureDetector(
-                onTap: () => _controller.animateToPage(entry.key),
-                child: Container(
-                  width: 12.0,
-                  height: 12.0,
-                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                  decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withOpacity(currentIndex == entry.key ? 0.9 : 0.4)),
-                ),
-              );
-            }).toList(),
-          )
-        ],
-      );
+        ),
+        //Index Carousel
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: bannerList.asMap().entries.map((entry) {
+          //children: listBannerTest.asMap().entries.map((entry) {
+            return GestureDetector(
+              onTap: () => _controller.animateToPage(entry.key),
+              child: Container(
+                width: 12.0,
+                height: 12.0,
+                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withOpacity(currentIndex == entry.key ? 0.9 : 0.4)),
+              ),
+            );
+          }).toList(),
+        )
+      ],
+    );
   }
 
   /*------------ Grid Menu ------------*/
@@ -284,23 +285,23 @@ class HomeViewState extends State<HomeView> {
       cardHeight = 34.h;
     else
       cardHeight = 35.h;
-    List<String> teks = ["Jadwal Dokter", "Imunisasi", "Medical Checkup", "Klinik Online", "Periksa COVID", "Lain-Lain"];
+    List<String> teks = ["Jadwal Dokter", "Imunisasi", "Medical Checkup", "Klinik Online", "Periksa COVID", "Pemeriksaan Lab", "Fast Track"];
     final List<String> icons = [
       "assets/images/Jadwal_Dokter.png",
       "assets/images/DT_IMUNISASI.png",
       "assets/images/MCU.png",
       "assets/images/Klinik_Online.png",
       "assets/images/Pemeriksaan_COVID.png",
-      "assets/images/Lainnya.png"];
+      "assets/images/Pemeriksaan_LAB.png",
+      "assets/images/Fast_Track.png"];
     return GridView.count(
         shrinkWrap: true,
         childAspectRatio: cardWidth / cardHeight,
         crossAxisCount: 2,
-        physics: NeverScrollableScrollPhysics(),
         scrollDirection: Axis.horizontal,
         mainAxisSpacing: 5,
         crossAxisSpacing: 3,
-        children: List.generate(6, (index) {
+        children: List.generate(icons.length, (index) {
           return
             Center(
               child: Container(
@@ -322,8 +323,8 @@ class HomeViewState extends State<HomeView> {
                             launchWhatsApp("Klinik");
                           if(index == 4)
                             _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
-                          if(index == 5)
-                            showMenu(context);
+                          // if(index == 5)
+                          //   showMenu(context);
                         },
                         child: Container(
                           width: 80,
@@ -344,77 +345,77 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  Future<void> showMenu(BuildContext context) async {
-    double cardWidth = MediaQuery.of(context).size.width / 2;
-    double cardHeight = MediaQuery.of(context).size.height / 3.5;
-    List<String> teks = ["Jadwal Dokter", "Imunisasi", "Medical Chekup", "Klinik Online", "Periksa COVID", "Pemeriksaan Lab", "Fast Track"];
-    final List<String> icons = [
-      "assets/images/Jadwal_Dokter.png",
-      "assets/images/DT_IMUNISASI.png",
-      "assets/images/MCU.png",
-      "assets/images/Klinik_Online.png",
-      "assets/images/Pemeriksaan_COVID.png",
-      "assets/images/Pemeriksaan_LAB.png",
-      "assets/images/Fast_Track.png",
-    ];
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return SimpleDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20.0)),
-          ),
-          children: <Widget>[
-            Container(
-              width: 350,
-              height: 350,
-              child: GridView.count(
-                childAspectRatio: cardWidth / cardHeight,
-                crossAxisCount: 3,
-                scrollDirection: Axis.vertical,
-                mainAxisSpacing: 5,
-                crossAxisSpacing: 3,
-                children: List.generate(icons.length, (index) {
-                  return
-                    SizedBox(
-                      child: Column(
-                        children: [
-                          InkWell(
-                            onTap: (){
-                              if(index == 0)
-                                Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DoctorList()));
-                              if(index == 1)
-                                launchWhatsApp("Imunisasi");
-                              if(index == 2)
-                                launchWhatsApp("MCU");
-                              if(index == 3)
-                                launchWhatsApp("Klinik");
-                              if(index == 4)
-                                _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
-                            },
-                            child: Container(
-                              width: 80,
-                              child: index != 6 && index !=5 ? Image.asset(icons[index]) : ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.grey,
-                                  BlendMode.saturation,
-                                ),
-                                child: Image.asset(icons[index]),
-                              )
-                            )
-                          ),
-                          Center(child: Text(teks[index],textAlign: TextAlign.center,style: TextStyle(color: Colors.black, fontSize:14, fontWeight: FontWeight.bold),))
-                        ],
-                      )
-                    );
-                })
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Future<void> showMenu(BuildContext context) async {
+  //   double cardWidth = MediaQuery.of(context).size.width / 2;
+  //   double cardHeight = MediaQuery.of(context).size.height / 3.5;
+  //   List<String> teks = ["Jadwal Dokter", "Imunisasi", "Medical Chekup", "Klinik Online", "Periksa COVID", "Pemeriksaan Lab", "Fast Track"];
+  //   final List<String> icons = [
+  //     "assets/images/Jadwal_Dokter.png",
+  //     "assets/images/DT_IMUNISASI.png",
+  //     "assets/images/MCU.png",
+  //     "assets/images/Klinik_Online.png",
+  //     "assets/images/Pemeriksaan_COVID.png",
+  //     "assets/images/Pemeriksaan_LAB.png",
+  //     "assets/images/Fast_Track.png",
+  //   ];
+  //   await showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return SimpleDialog(
+  //         shape: const RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.all(Radius.circular(20.0)),
+  //         ),
+  //         children: <Widget>[
+  //           Container(
+  //             width: 350,
+  //             height: 350,
+  //             child: GridView.count(
+  //               childAspectRatio: cardWidth / cardHeight,
+  //               crossAxisCount: 3,
+  //               scrollDirection: Axis.vertical,
+  //               mainAxisSpacing: 5,
+  //               crossAxisSpacing: 3,
+  //               children: List.generate(icons.length, (index) {
+  //                 return
+  //                   SizedBox(
+  //                     child: Column(
+  //                       children: [
+  //                         InkWell(
+  //                           onTap: (){
+  //                             if(index == 0)
+  //                               Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DoctorList()));
+  //                             if(index == 1)
+  //                               launchWhatsApp("Imunisasi");
+  //                             if(index == 2)
+  //                               launchWhatsApp("MCU");
+  //                             if(index == 3)
+  //                               launchWhatsApp("Klinik");
+  //                             if(index == 4)
+  //                               _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
+  //                           },
+  //                           child: Container(
+  //                             width: 80,
+  //                             child: index != 6 && index !=5 ? Image.asset(icons[index]) : ColorFiltered(
+  //                               colorFilter: ColorFilter.mode(
+  //                                 Colors.grey,
+  //                                 BlendMode.saturation,
+  //                               ),
+  //                               child: Image.asset(icons[index]),
+  //                             )
+  //                           )
+  //                         ),
+  //                         Center(child: Text(teks[index],textAlign: TextAlign.center,style: TextStyle(color: Colors.black, fontSize:14, fontWeight: FontWeight.bold),))
+  //                       ],
+  //                     )
+  //                   );
+  //               })
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   /*------------ Menu Media Sosial------------*/
   
@@ -470,39 +471,49 @@ class HomeViewState extends State<HomeView> {
   }
 
   Widget gridPromoLayanan(List<BannerModel> listBanner) {
-    return GridView.count(
-      shrinkWrap: true,
-      primary: false,
-      padding: const EdgeInsets.all(20),
-      scrollDirection: Axis.horizontal,
-      crossAxisCount: 1,
-        children: List.generate(listBanner.length, (index) {
-      // children: List.generate(listBannerPromoTest.length, (index) {
-        return
-          Center(
-            child: Container(
-                alignment: Alignment.center,
-                child:
-                SizedBox(
-                  child: Column(
-                    children: [
-                      InkWell(
-                        onTap: (){
-                          Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: listBanner[index], keterangan: 'Promo')));
-                        },
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          child: Image.network(listBanner[index].url, fit: BoxFit.contain),
-                          // child: Image.asset(listBannerPromoTest[index]),
+    return Container(
+      width: double.infinity,
+      color: Constant.color,
+      child: GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        padding: const EdgeInsets.all(20),
+        scrollDirection: Axis.horizontal,
+        crossAxisCount: 1,
+          children: List.generate(listBanner.length, (index) {
+        // children: List.generate(listBannerPromoTest.length, (index) {
+          return
+            Center(
+              child: Container(
+                  alignment: Alignment.center,
+                  child:
+                  SizedBox(
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: (){
+                            Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: listBanner[index], keterangan: 'Promo')));
+                          },
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2
+                              )
+                            ),
+                            child: Image.network(listBanner[index].url, fit: BoxFit.contain),
+                            // child: Image.asset(listBannerPromoTest[index]),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    )
                   )
-                )
-            ),
-          );
-      })
+              ),
+            );
+        })
+      ),
     );
   }
 
