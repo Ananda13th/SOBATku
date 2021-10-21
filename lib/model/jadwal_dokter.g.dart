@@ -14,6 +14,7 @@ JadwalDokter _$JadwalDokterFromJson(Map<String, dynamic> json) {
     jadwalPraktek: (json['jadwal'] as List<dynamic>)
         .map((e) => Jadwal.fromJson(e as Map<String, dynamic>))
         .toList(),
+    aktif: json['aktif'] as String,
   );
 }
 
@@ -23,4 +24,5 @@ Map<String, dynamic> _$JadwalDokterToJson(JadwalDokter instance) =>
       'hari': instance.hari,
       'kode_dokter': instance.kodeDokter,
       'jadwal': instance.jadwalPraktek,
+      'aktif': instance.aktif,
     };

@@ -10,10 +10,12 @@ Jadwal _$JadwalFromJson(Map<String, dynamic> json) {
   return Jadwal(
     jam: json['jam'] as String,
     kodeJadwal: json['id'] as String,
+    aktif: json['aktif'] as String,
   );
 }
 
 Map<String, dynamic> _$JadwalToJson(Jadwal instance) => <String, dynamic>{
       'jam': instance.jam,
       'id': instance.kodeJadwal,
+      'aktif': instance.aktif,
     };

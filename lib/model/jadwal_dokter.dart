@@ -10,12 +10,14 @@ class JadwalDokter {
   final String kodeDokter;
   @JsonKey(name: "jadwal")
   final List<Jadwal> jadwalPraktek;
+  final String aktif;
 
   JadwalDokter({
     required this.nama,
     required this.hari,
     required this.kodeDokter,
-    required this.jadwalPraktek});
+    required this.jadwalPraktek,
+    required this.aktif});
 
   factory JadwalDokter.fromJson(Map<String,dynamic> data) => _$JadwalDokterFromJson(data);
   Map<String,dynamic> toJson() => _$JadwalDokterToJson(this);
