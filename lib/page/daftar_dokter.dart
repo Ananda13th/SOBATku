@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
@@ -12,6 +13,7 @@ import 'package:sobatku/model/jadwal_dokter.dart';
 import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/model/transaksi_req.dart';
 import 'package:sobatku/page/sign_in.dart';
+import 'package:sobatku/service/cuti_service.dart';
 import 'package:sobatku/service/dokter_favorit_service.dart';
 import 'package:sobatku/service/dokter_service.dart';
 import 'package:sobatku/service/jadwal_dokter_service.dart';
@@ -31,27 +33,15 @@ class _DoctorListState extends State<DoctorList> {
   late DokterFavoritService dokterFavoritService;
   late PasienService pasienService;
   late TransaksiService transaksiService;
+  late CutiService cutiService;
   TextEditingController _searchController = TextEditingController();
-  late List<Dokter> doctors;
-  late List<Dokter> tempDoctorData;
-  Future<List<Dokter>>? _doctorData;
+  late List<Dokter> daftarDokter;
+  late List<Dokter> tempDaftarDokter;
+  Future<List<Dokter>>? _dokterData;
   late bool user =false;
   String idUser = "";
   int selectedIndex = 11;
 
-  getFavorit() async {
-    await SharedPreferenceHelper.getUser().then((value) {
-      idUser = value![2];
-    });
-    dokterFavoritService.getDokterfavorit(idUser).then((value){
-      value.forEach((element) {
-        setState(() {
-          listDokterFavorit.add(element.idDokter.toString());
-          SharedPreferenceHelper.addFavorite(listDokterFavorit);
-        });
-      });
-    });
-  }
 
   @override
   void initState() {
@@ -59,17 +49,18 @@ class _DoctorListState extends State<DoctorList> {
     doctorService = DokterService();
     pasienService = PasienService();
     jadwalService = JadwalService();
+    cutiService = CutiService();
     dokterFavoritService = DokterFavoritService();
     transaksiService = TransaksiService();
-    _doctorData = doctorService.getDokter();
+    _dokterData = doctorService.getDokter();
     checkUserExist().then((value) {
       if (value) {
         getFavorit();
         setState(() {
-          _doctorData!.then((value) {
+          _dokterData!.then((value) {
             setState(() {
-              doctors = value;
-              tempDoctorData = List.from(doctors);
+              daftarDokter = value;
+              tempDaftarDokter = List.from(daftarDokter);
             });
           });
           user = value;
@@ -79,10 +70,10 @@ class _DoctorListState extends State<DoctorList> {
         });
       }
       else {
-        _doctorData!.then((value) {
+        _dokterData!.then((value) {
           setState(() {
-            doctors = value;
-            tempDoctorData = List.from(doctors);
+            daftarDokter = value;
+            tempDaftarDokter = List.from(daftarDokter);
           });
         });
       }
@@ -109,7 +100,7 @@ class _DoctorListState extends State<DoctorList> {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: FutureBuilder<List<Dokter>>(
-            future: _doctorData,
+            future: _dokterData,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if(snapshot.hasError) {
                 return Center(
@@ -117,11 +108,19 @@ class _DoctorListState extends State<DoctorList> {
                 );
               }
               else if (snapshot.hasData){
-                return _buildListDokter(tempDoctorData);
+                return _buildListDokter(tempDaftarDokter);
               }
               else {
                 return Center(
-                  child: Container(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage("assets/images/loading.gif"),
+                          alignment: Alignment.center,
+                          fit: BoxFit.scaleDown
+                      )
+                    ),
+                  ),
                 );
               }
             },
@@ -214,7 +213,7 @@ class _DoctorListState extends State<DoctorList> {
 
   onCariDokter(String value) {
     setState(() {
-      tempDoctorData = doctors.where((element) => element.namaDokter.toLowerCase().contains(value.toLowerCase())).toList();
+      tempDaftarDokter = daftarDokter.where((element) => element.namaDokter.toLowerCase().contains(value.toLowerCase())).toList();
     });
   }
 
@@ -265,7 +264,7 @@ class _DoctorListState extends State<DoctorList> {
                 thickness: 2,
               ),
               FutureBuilder<List<JadwalDokter>>(
-                future: scheduleService.getJadwalDokterById(dokter.idDokter),
+                future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if(snapshot.hasData){
                     List<JadwalDokter> schedules = snapshot.data;
@@ -430,16 +429,38 @@ class _DoctorListState extends State<DoctorList> {
     String kodeJadwal = "";
     String tipe = "";
     String noRm = "";
+    bool cuti = false;
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
     List dayList = List.generate(15, (index) => index)
         .map((value) => DateFormat('dd')
         .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
-    if(jadwalDokter.hari < now.weekday)
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari+7] + jam.substring(0,2);
+    if(jadwalDokter.hari < now.weekday) {
+      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
+    }
+    else {
+      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0, 2);
+    }
+    print("Kode Jadwal : "+kodeJadwal);
+
+    await cutiService.cekCuti(kodeJadwal).then((value) {
+      cuti = value;
+    });
+
+    if(cuti == true) {
+      showToast("Maaf, Dokter Sedang Cuti",
+          context: context,
+          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+          backgroundColor: Colors.red,
+          animation: StyledToastAnimation.scale,
+          reverseAnimation: StyledToastAnimation.fade,
+          position: StyledToastPosition.center,
+          animDuration: Duration(seconds: 1),
+          duration: Duration(seconds: 4),
+          curve: Curves.elasticOut,
+          reverseCurve: Curves.linear);
+    }
     else
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0,2);
-    print(kodeJadwal);
     if (user) {
       SharedPreferenceHelper.getUser().then((value) {
         setState(() {
@@ -660,5 +681,22 @@ class _DoctorListState extends State<DoctorList> {
       );
     }
   }
+
+  /*------------ Ambil Daftar Dokter Favorit ------------*/
+
+  getFavorit() async {
+    await SharedPreferenceHelper.getUser().then((value) {
+      idUser = value![2];
+    });
+    dokterFavoritService.getDokterfavorit(idUser).then((value){
+      value.forEach((element) {
+        setState(() {
+          listDokterFavorit.add(element.idDokter.toString());
+          SharedPreferenceHelper.addFavorite(listDokterFavorit);
+        });
+      });
+    });
+  }
+
 }
 

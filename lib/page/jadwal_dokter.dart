@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:group_button/group_button.dart';
 import 'package:intl/intl.dart';
 import 'package:searchable_dropdown/searchable_dropdown.dart';
@@ -12,6 +13,7 @@ import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/model/spesialisasi.dart';
 import 'package:sobatku/model/transaksi_req.dart';
 import 'package:sobatku/page/sign_in.dart';
+import 'package:sobatku/service/cuti_service.dart';
 import 'package:sobatku/service/jadwal_dokter_service.dart';
 import 'package:sobatku/service/pasien_service.dart';
 import 'package:sobatku/service/spesialisasi_service.dart';
@@ -49,6 +51,7 @@ class ScheduleViewState extends State<ScheduleView> {
   late TransaksiService transaksiService;
   late JadwalService jadwalService;
   late PasienService pasienService;
+  late CutiService cutiService;
 
   late List<Spesialisasi> daftarSpesialisasi;
   late List<JadwalDokter> listJadwal;
@@ -58,6 +61,7 @@ class ScheduleViewState extends State<ScheduleView> {
   late String idUser;
   late int selectedIndex = 11;
   late DateTime dateTime;
+
 
   @override
   void initState() {
@@ -75,6 +79,7 @@ class ScheduleViewState extends State<ScheduleView> {
     transaksiService = TransaksiService();
     jadwalService =JadwalService();
     pasienService = PasienService();
+    cutiService = CutiService();
 
     //Ambil Data Bila User Sudah Ada
     SharedPreferenceHelper.checkUserExist().then((value) {
@@ -234,8 +239,10 @@ class ScheduleViewState extends State<ScheduleView> {
         unselectedColor:  Colors.lightGreen[300],
         borderRadius: BorderRadius.circular(30),
         isRadio: true,
-        buttons: value.reversed.toList(),
-        onSelected: (int index, bool isSelected) {_buildPasienListDialog(context, schedule, schedule.jadwalPraktek[index].jam);}
+        buttons: value.toList(),
+        onSelected: (int index, bool isSelected) {
+           _buildPasienListDialog(context, schedule, schedule.jadwalPraktek[index].jam);
+        }
       );
     } else {
       return GroupButton(
@@ -247,7 +254,9 @@ class ScheduleViewState extends State<ScheduleView> {
         borderRadius: BorderRadius.circular(30),
         isRadio: true,
         buttons: value,
-        onSelected: (int index, bool isSelected) {_buildAlert(context);},
+        onSelected: (int index, bool isSelected) {
+            _buildAlert(context);
+        },
       );
     }
   }
@@ -295,16 +304,40 @@ class ScheduleViewState extends State<ScheduleView> {
     String kodeJadwal = "";
     String tipe = "";
     String noRm = "";
+    bool cuti = false;
+    String tanggalDipilih = "";
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
     List dayList = List.generate(15, (index) => index)
         .map((value) => DateFormat('dd')
         .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
-    if(jadwalDokter.hari < now.weekday || now.compareTo(dateTime) == -1)
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari+7] + jam.substring(0,2);
+    if(jadwalDokter.hari < now.weekday) {
+      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
+      tanggalDipilih =  DateFormat('yyyy-MM').format(now) + "-" + dayList[jadwalDokter.hari + 7];
+    }
+    else {
+      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0, 2);
+      tanggalDipilih =  DateFormat('yyyy-MM').format(now) + "-" + dayList[jadwalDokter.hari];
+    }
+    print("Kode Jadwal : "+kodeJadwal);
+    await cutiService.cekCuti(kodeJadwal).then((value) {
+        cuti = value;
+    });
+
+    if(cuti == true) {
+      showToast("Maaf, Dokter Sedang Cuti",
+          context: context,
+          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+          backgroundColor: Colors.red,
+          animation: StyledToastAnimation.scale,
+          reverseAnimation: StyledToastAnimation.fade,
+          position: StyledToastPosition.center,
+          animDuration: Duration(seconds: 1),
+          duration: Duration(seconds: 4),
+          curve: Curves.elasticOut,
+          reverseCurve: Curves.linear);
+    }
     else
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0,2);
-    print(kodeJadwal);
     if (isUserExist) {
       SharedPreferenceHelper.getUser().then((value) {
         setState(() {

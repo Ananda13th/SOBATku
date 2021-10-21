@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
@@ -11,6 +12,7 @@ import 'package:sobatku/model/jadwal_dokter.dart';
 import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/model/transaksi_req.dart';
 import 'package:sobatku/page/sign_in.dart';
+import 'package:sobatku/service/cuti_service.dart';
 import 'package:sobatku/service/dokter_favorit_service.dart';
 import 'package:sobatku/service/dokter_service.dart';
 import 'package:sobatku/service/jadwal_dokter_service.dart';
@@ -30,6 +32,7 @@ class _FavoriteListState extends State<FavoriteList> {
   late PasienService pasienService;
   late DokterFavoritService dokterFavoritService;
   late TransaksiService transaksiService;
+  late CutiService cutiService;
   TextEditingController _searchController = TextEditingController();
   late List<Dokter> doctors;
   late List<Dokter> tempDoctorData;
@@ -41,11 +44,11 @@ class _FavoriteListState extends State<FavoriteList> {
   @override
   void initState() {
     super.initState();
-
     doctorService = DokterService();
     pasienService = PasienService();
     jadwalService = JadwalService();
     transaksiService = TransaksiService();
+    cutiService = CutiService();
     _doctorData = doctorService.getDokter();
     _doctorData!.then((value) {
       setState(() {
@@ -206,7 +209,7 @@ class _FavoriteListState extends State<FavoriteList> {
                           thickness: 2,
                         ),
                         FutureBuilder<List<JadwalDokter>>(
-                            future: scheduleService.getJadwalDokterById(dokter.idDokter),
+                            future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
                             builder: (BuildContext context, AsyncSnapshot snapshot) {
                               if(snapshot.hasData){
                                 List<JadwalDokter> schedules = snapshot.data;
@@ -383,16 +386,42 @@ class _FavoriteListState extends State<FavoriteList> {
     List<String> value = ["2", "3", "9"];
     String kodeJadwal = "";
     String tipe = "";
+    String noRm = "";
+    bool cuti = false;
+    String tanggalDipilih = "";
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
     List dayList = List.generate(15, (index) => index)
         .map((value) => DateFormat('dd')
         .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
-    if(jadwalDokter.hari < now.weekday)
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari+7] + jam.substring(0,2);
+    if(jadwalDokter.hari < now.weekday) {
+      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
+      tanggalDipilih =  DateFormat('yyyy-MM').format(now) + "-" + dayList[jadwalDokter.hari + 7];
+    }
+    else {
+      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0, 2);
+      tanggalDipilih =  DateFormat('yyyy-MM').format(now) + "-" + dayList[jadwalDokter.hari];
+    }
+    print("Kode Jadwal : "+kodeJadwal);
+
+    await cutiService.cekCuti(kodeJadwal).then((value) {
+      cuti = value;
+    });
+
+    if(cuti == true) {
+      showToast("Maaf, Dokter Sedang Cuti",
+          context: context,
+          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+          backgroundColor: Colors.red,
+          animation: StyledToastAnimation.scale,
+          reverseAnimation: StyledToastAnimation.fade,
+          position: StyledToastPosition.center,
+          animDuration: Duration(seconds: 1),
+          duration: Duration(seconds: 4),
+          curve: Curves.elasticOut,
+          reverseCurve: Curves.linear);
+    }
     else
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0,2);
-    String noRm = "";
     if (user) {
       SharedPreferenceHelper.getUser().then((value) {
         setState(() {
