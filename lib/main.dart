@@ -26,15 +26,12 @@ import 'helper/local_notification.dart';
 import 'model/jadwal_dokter.dart';
 import 'model/pasien.dart';
 import 'model/spesialisasi.dart';
-import 'package:android_autostart/android_autostart.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:auto_start_flutter/auto_start_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   messageHandler();
-  // initAutoStart();
-  FirebaseMessaging.onBackgroundMessage(_messageHandler);
+  FirebaseMessaging.onBackgroundMessage(LocalNotification.showNotification);
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],
   ); // To turn off landscape mode
@@ -182,7 +179,7 @@ class _HomeState extends State<MyApp> {
         selectedLabelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         unselectedLabelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         items: [
-          BottomNavigationBarItem(label: "Utama", icon: new Icon(Icons.home)),
+          BottomNavigationBarItem(label: "Beranda", icon: new Icon(Icons.home)),
           BottomNavigationBarItem(label: "Kartu RM", icon: new Icon(Icons.credit_card)),
           BottomNavigationBarItem(label: "", icon: new Icon(Icons.task, color:  Constant.color)),
           BottomNavigationBarItem(label: "Aktivitas", icon: new Icon(Icons.list_alt)),
@@ -250,7 +247,7 @@ class _HomeState extends State<MyApp> {
       builder: (context) {
         return SimpleDialog(
           contentPadding: EdgeInsets.only(top: 10.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           children: [
             StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return Column (
@@ -337,8 +334,8 @@ class _HomeState extends State<MyApp> {
                                 decoration: BoxDecoration(
                                   color:  Constant.color,
                                   borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(20.0),
-                                      bottomRight: Radius.circular(20.0)),
+                                      bottomLeft: Radius.circular(10.0),
+                                      bottomRight: Radius.circular(10.0)),
                                 ),
                                 child: Text(
                                   "Cari",
@@ -511,19 +508,7 @@ getDeviceInfo() async {
   return androidInfo.manufacturer;
 }
 
-/*------------ Ambil Informasi Perangkat ------------*/
 
-Future<void> initAutoStart() async {
-  try {
-    //check auto-start availability.
-    var test = await isAutoStartAvailable;
-    print(test);
-    //if available then navigate to auto-start setting page.
-    if (test) await getAutoStartPermission();
-  } on PlatformException catch (e) {
-    print(e);
-  }
-}
 
 
 
