@@ -22,9 +22,9 @@ class PasienService {
     }
   }
 
-  Future<bool> searchPasien(String nomorRm) async {
+  Future<bool> searchPasien(String nomorRm, String namaBelakang) async {
     final response = await http.get(
-      Uri.parse(baseUrl + "pasien/search/$nomorRm"),
+      Uri.parse(baseUrl + "pasien/search/$nomorRm/$namaBelakang"),
       headers: URL.createHeader()
     );
     if(response.statusCode == 200) {
