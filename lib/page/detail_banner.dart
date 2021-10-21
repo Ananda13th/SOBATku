@@ -31,14 +31,16 @@ class DetailBanner extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Container(
-                              height: keterangan == "Promo" ? 50.h : 30.h,
+                              height: 50.h,
                               child: GestureDetector(
                                 onTap:() {
                                   Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                    if( keterangan == "Banner")
+                                      return DetailScreen(image: bannerModel.urlDetailBanner.toString());
                                     return DetailScreen(image: bannerModel.url);
                                   }));
                                 },
-                                child: Image.network(bannerModel.url, fit: BoxFit.fill)
+                                child: keterangan == "Banner" ? Image.network(bannerModel.urlDetailBanner.toString(), fit: BoxFit.fill) : Image.network(bannerModel.url)
                               ),
                             ),
                           )
