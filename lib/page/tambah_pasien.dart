@@ -63,22 +63,22 @@ class TambahPasienState extends State<TambahPasien> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          // TextFormField(
-                          //   autovalidateMode: AutovalidateMode.onUserInteraction,
-                          //   controller: namaField,
-                          //   decoration: const InputDecoration(
-                          //     border: OutlineInputBorder(),
-                          //     icon: Icon(Icons.person),
-                          //     labelText: 'Nama Belakang Pasien',
-                          //   ),
-                          //   validator: (String? value) {
-                          //     if (value == null || value.isEmpty) {
-                          //       return 'Mohon Isikan Nama Belakang Pasien';
-                          //     }
-                          //     return null;
-                          //   },
-                          // ),
-                          // SizedBox(height: 5),
+                          TextFormField(
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            controller: namaField,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              icon: Icon(Icons.person),
+                              labelText: 'Nama Belakang Pasien',
+                            ),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Mohon Isikan Nama Belakang Pasien';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 5),
                           // TextFormField(
                           //   controller: noBpjsField,
                           //   keyboardType: TextInputType.number,
@@ -149,19 +149,20 @@ class TambahPasienState extends State<TambahPasien> {
                                         reverseCurve: Curves.linear,
                                       );
                                     } else {
-                                      pasienService.searchPasien(noRmField.text).then(
+                                      pasienService.searchPasien(noRmField.text, namaField.text).then(
                                         (value) {
                                           if(value == false) {
-                                            Pasien pasien = new Pasien(namaPasien: namaField.text, nomorBpjs: noBpjsField.text, nomorKtp: noKtpField.text, nomorRm: noRmField.text);
-                                            pasienService.createPasien(pasien).then(
-                                              (value) {
-                                                if(value == "Success") {
-                                                  pasienService.createPairing(noRmField.text, userId);
-                                                  Navigator.of(context).pushReplacement(
-                                                      new MaterialPageRoute(builder: (context) => new MyApp())
-                                                  );
-                                                }
-                                              }
+                                            showToast('Pasien Tidak Ditemukan',
+                                              context: context,
+                                              textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
+                                              backgroundColor: Colors.red,
+                                              animation: StyledToastAnimation.scale,
+                                              reverseAnimation: StyledToastAnimation.fade,
+                                              position: StyledToastPosition.center,
+                                              animDuration: Duration(seconds: 1),
+                                              duration: Duration(seconds: 4),
+                                              curve: Curves.elasticOut,
+                                              reverseCurve: Curves.linear,
                                             );
                                           }
                                           else if(value == true){
