@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:screen/screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/model/transaksi_resp.dart';
@@ -76,7 +77,7 @@ class _AktivitasState extends State<Aktivitas> {
                             response.forEach((element) {
                               String date =  DateFormat("yyyy-MM-dd").format(DateTime.parse(element.tanggal).add(Duration(hours: 7)));
                               element.tanggal = date;
-                              if(!DateTime.parse(element.tanggal).isBefore(now))
+                              if(!DateTime.parse(element.tanggal).isBefore(now.subtract(Duration(days: 1))))
                                 aktif.add(element);
                             });
                             return _buildListAktivitas(aktif, "aktif");
@@ -116,7 +117,7 @@ class _AktivitasState extends State<Aktivitas> {
                             response.forEach((element) {
                               String date =  DateFormat("yyyy-MM-dd").format(DateTime.parse(element.tanggal).add(Duration(hours: 7)));
                               element.tanggal = date;
-                              if(DateTime.parse(element.tanggal).isBefore(now))
+                              if(DateTime.parse(element.tanggal).isBefore(now.subtract(Duration(days: 1))))
                                 riwayat.add(element);
                             });
                             return _buildListAktivitas(riwayat, "riwayat");
@@ -175,7 +176,7 @@ class _AktivitasState extends State<Aktivitas> {
                     Text(tResp.antrian, style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
                     tipe == "aktif" ?
                     InkWell(
-                      onTap: (){_buildQr(context, tResp);},
+                      onTap: (){_buildQr(context, tResp).then((value) => Screen.setBrightness(value));},
                       child: QrImage(
                         data: tResp.kodeJadwal + "." + tResp.antrian + "." + tResp.nomorRm,
                         version: QrVersions.auto,
@@ -206,8 +207,11 @@ class _AktivitasState extends State<Aktivitas> {
     setState(() {});
   }
 
-  Future<void> _buildQr(BuildContext context, TransaksiResp tResp) async {
+  Future<double> _buildQr(BuildContext context, TransaksiResp tResp) async {
+    double currentBrightness = await Screen.brightness;
+    Screen.setBrightness(1);
     await showDialog(
+      barrierColor: Constant.color,
       context: context,
       builder: (context) {
         return SimpleDialog(
@@ -215,7 +219,7 @@ class _AktivitasState extends State<Aktivitas> {
             Column(
               children: [
                 SizedBox(
-                  height: 250,
+                  height:250,
                   width: 250,
                   child: QrImage(
                     data: tResp.kodeJadwal + "." + tResp.antrian + "." + tResp.nomorRm,
@@ -239,5 +243,6 @@ class _AktivitasState extends State<Aktivitas> {
         );
       },
     );
+    return currentBrightness;
   }
 }
