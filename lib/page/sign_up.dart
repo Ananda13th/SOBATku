@@ -40,6 +40,7 @@ class SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     return Scaffold(
+
       appBar: AppBar(
         title: Text("Daftar User Baru"),
         backgroundColor: Constant.color,
@@ -75,8 +76,37 @@ class SignUpState extends State<SignUp> {
                       child: Column(
                         children: [
                           TextFormField(
-                            textInputAction: TextInputAction.next,
+                            textInputAction: TextInputAction.done,
                             autovalidateMode: AutovalidateMode.onUserInteraction,
+                            keyboardType: TextInputType.phone,
+                            controller: noHpField,
+                            focusNode: _noHpFocus,
+                            decoration: const InputDecoration(
+                              isDense: true,
+                              border: OutlineInputBorder(),
+                              prefixIcon: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("+62",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                              prefixIconConstraints:
+                              BoxConstraints(minWidth: 0, minHeight: 0),
+                              icon: Icon(Icons.phone_android),
+                              labelText: 'Nomor HP',
+                            ),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Mohon Isikan Nomor HP';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 5),
+                          TextFormField(
+                            textInputAction: TextInputAction.next,
+                            // autovalidateMode: AutovalidateMode.onUserInteraction,
                             controller: emailField,
                             keyboardType: TextInputType.emailAddress,
                             focusNode: _emailFocus,
@@ -86,14 +116,14 @@ class SignUpState extends State<SignUp> {
                               icon: Icon(Icons.email),
                               labelText: 'Email',
                             ),
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty)
-                                return 'Mohon Isikan Alamat Email';
-                              if(!EmailValidator.validate(value)) {
-                                return 'Alamat Email Tidak Valid';
-                              }
-                              return null;
-                            },
+                            // validator: (String? value) {
+                            //   if (value == null || value.isEmpty)
+                            //     return 'Mohon Isikan Alamat Email';
+                            //   if(!EmailValidator.validate(value)) {
+                            //     return 'Alamat Email Tidak Valid';
+                            //   }
+                            //   return null;
+                            // },
                           ),
                           SizedBox(height: 10),
                           TextFormField(
@@ -138,35 +168,6 @@ class SignUpState extends State<SignUp> {
                             },
                           ),
                           SizedBox(height: 10),
-                          TextFormField(
-                            textInputAction: TextInputAction.done,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
-                            keyboardType: TextInputType.phone,
-                            controller: noHpField,
-                            focusNode: _noHpFocus,
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              border: OutlineInputBorder(),
-                              prefixIcon: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text("+62",
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                              prefixIconConstraints:
-                              BoxConstraints(minWidth: 0, minHeight: 0),
-                              icon: Icon(Icons.phone_android),
-                              labelText: 'Nomor HP',
-                            ),
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Mohon Isikan Nomor HP';
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(height: 5),
                           Row(
                             children: [
                               Expanded(
