@@ -9,6 +9,7 @@ part of 'banner.dart';
 BannerModel _$BannerModelFromJson(Map<String, dynamic> json) {
   return BannerModel(
     url: json['url'] as String,
+    urlDetailBanner: json['url_detail_banner'] as String?,
     deskripsi: json['deskripsi'] as String,
     keterangan: json['keterangan'] as String,
   );
@@ -17,6 +18,7 @@ BannerModel _$BannerModelFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$BannerModelToJson(BannerModel instance) =>
     <String, dynamic>{
       'url': instance.url,
+      'url_detail_banner': instance.urlDetailBanner,
       'deskripsi': instance.deskripsi,
       'keterangan': instance.keterangan,
     };
