@@ -1,9 +1,8 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:sobatku/helper/constant.dart';
+import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/model/user.dart';
 import 'package:sobatku/page/konfirmasi_otp.dart';
 import 'package:sobatku/service/user_service.dart';
@@ -77,7 +76,7 @@ class SignUpState extends State<SignUp> {
                         children: [
                           TextFormField(
                             textInputAction: TextInputAction.done,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode: AutovalidateMode.always,
                             keyboardType: TextInputType.phone,
                             controller: noHpField,
                             focusNode: _noHpFocus,
@@ -98,7 +97,7 @@ class SignUpState extends State<SignUp> {
                             ),
                             validator: (String? value) {
                               if (value == null || value.isEmpty) {
-                                return 'Mohon Isikan Nomor HP';
+                                return 'Wajib Diisi';
                               }
                               return null;
                             },
@@ -116,14 +115,6 @@ class SignUpState extends State<SignUp> {
                               icon: Icon(Icons.email),
                               labelText: 'Email',
                             ),
-                            // validator: (String? value) {
-                            //   if (value == null || value.isEmpty)
-                            //     return 'Mohon Isikan Alamat Email';
-                            //   if(!EmailValidator.validate(value)) {
-                            //     return 'Alamat Email Tidak Valid';
-                            //   }
-                            //   return null;
-                            // },
                           ),
                           SizedBox(height: 10),
                           TextFormField(
@@ -131,7 +122,7 @@ class SignUpState extends State<SignUp> {
                             obscureText: true,
                             controller: passwordField,
                             focusNode: _passwordFocus,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode: AutovalidateMode.always,
                             decoration: const InputDecoration(
                               hintText: "6-12 Karakter",
                               isDense: true,
@@ -141,7 +132,7 @@ class SignUpState extends State<SignUp> {
                             ),
                             validator: (String? value) {
                               if (value == null || value.isEmpty) {
-                                return 'Mohon Isikan Kata Sandi';
+                                return 'Wajib Diisi';
                               }
                               if(value.length > 12 || value.length < 6)
                                 return 'Kata Sandi 6-12 Karakter';
@@ -153,7 +144,7 @@ class SignUpState extends State<SignUp> {
                             textInputAction: TextInputAction.next,
                             controller: namaField,
                             focusNode: _namaFocus,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            autovalidateMode: AutovalidateMode.always,
                             decoration: const InputDecoration(
                               isDense: true,
                               border: OutlineInputBorder(),
@@ -162,7 +153,7 @@ class SignUpState extends State<SignUp> {
                             ),
                             validator: (String? value) {
                               if (value == null || value.isEmpty) {
-                                return 'Mohon Isikan Nama Lengkap';
+                                return 'Wajib Diisi';
                               }
                               return null;
                             },
@@ -174,18 +165,7 @@ class SignUpState extends State<SignUp> {
                                 child: ElevatedButton(
                                   onPressed: (){
                                     if (!_formKey.currentState!.validate()) {
-                                      showToast('Harap Isi Semua Data',
-                                        context: context,
-                                        textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                        backgroundColor: Colors.red,
-                                        animation: StyledToastAnimation.scale,
-                                        reverseAnimation: StyledToastAnimation.fade,
-                                        position: StyledToastPosition.center,
-                                        animDuration: Duration(seconds: 1),
-                                        duration: Duration(seconds: 4),
-                                        curve: Curves.elasticOut,
-                                        reverseCurve: Curves.linear,
-                                      );
+                                      ToastNotification.showNotification('Harap Isi Semua Data', context, Colors.red);
                                     } else {
                                       String noHp = noHpField.text;
                                       if(noHpField.text.substring(0,1) == "0") {
@@ -199,25 +179,14 @@ class SignUpState extends State<SignUp> {
                                           namaUser: namaField.text,
                                           nomorHp: noHp,
                                           email: emailField.text);
-                                      userService.sendOtp(noHp);
                                       userService.createUser(user).then((value) {
                                         if(value) {
+                                          userService.sendOtp(noHp);
                                           Navigator.of(context).pushReplacement(
-                                            new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp)));
+                                            new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp, "baru")));
                                         }
                                         else
-                                          showToast('Terjadi Kesalahan',
-                                            context: context,
-                                            textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                            backgroundColor: Colors.red,
-                                            animation: StyledToastAnimation.scale,
-                                            reverseAnimation: StyledToastAnimation.fade,
-                                            position: StyledToastPosition.center,
-                                            animDuration: Duration(seconds: 1),
-                                            duration: Duration(seconds: 4),
-                                            curve: Curves.elasticOut,
-                                            reverseCurve: Curves.linear,
-                                          );
+                                          ToastNotification.showNotification('Terjadi Kesalahan', context, Colors.red);
                                         }
                                       );
                                     }

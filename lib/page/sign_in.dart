@@ -3,12 +3,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
+import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/page/sign_up.dart';
 import 'package:sobatku/service/user_service.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
-import '../main.dart';
+import 'halaman_utama.dart';
+import 'konfirmasi_otp.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -23,6 +23,7 @@ class SignInState extends State<SignIn> {
   late UserService userService;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   late final SharedPreferences prefs;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -37,7 +38,6 @@ class SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -58,7 +58,8 @@ class SignInState extends State<SignIn> {
                 color: Colors.transparent,
                 borderRadius: BorderRadius.all(Radius.circular(10))
               ),
-              child: Padding(
+              child:
+              Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
                   key: _formKey,
@@ -117,7 +118,7 @@ class SignInState extends State<SignIn> {
                           child: RichText(
                             text: TextSpan(
                               children: <TextSpan>[
-                                TextSpan(text: 'Lupa Password? ', style: TextStyle(color: Colors.black)),
+                                TextSpan(text: 'Atur Ulang Password? ', style: TextStyle(color: Colors.black)),
                                 TextSpan(
                                     text: 'Klik Disini',
                                     style: TextStyle(color: Constant.color, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
@@ -168,21 +169,14 @@ class SignInState extends State<SignIn> {
                                                 noHp.replaceFirst(RegExp('0'), "+62");
                                               else
                                                 noHp = "+62" + noHpField.text;
-                                              userService.resetPassword(noHp).then((value) =>
-                                                showToast(value,
-                                                  context: context,
-                                                  textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                                  backgroundColor: Constant.color,
-                                                  animation: StyledToastAnimation.scale,
-                                                  reverseAnimation: StyledToastAnimation.fade,
-                                                  position: StyledToastPosition.center,
-                                                  animDuration: Duration(seconds: 1),
-                                                  duration: Duration(seconds: 4),
-                                                  curve: Curves.elasticOut,
-                                                  reverseCurve: Curves.linear,
-                                                )
-                                              );
-                                              Future.delayed(Duration(seconds: 3)).then((value) =>  Navigator.of(context).pop());
+                                              userService.sendOtp(noHp);
+                                              Navigator.of(context).pushReplacement(
+                                                  new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp, "reset")));
+
+                                              // userService.resetPassword(noHp).then((value) =>
+                                              //     ToastNotification.showNotification(value, context, Constant.color)
+                                              // );
+
                                             },
                                             child: Text(
                                               "Atur Ulang Password",
@@ -206,18 +200,7 @@ class SignInState extends State<SignIn> {
                               child: ElevatedButton(
                                 onPressed: (){
                                   if (!_formKey.currentState!.validate()) {
-                                    showToast('Harap Isi Semua Data',
-                                      context: context,
-                                      textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                      backgroundColor: Colors.red,
-                                      animation: StyledToastAnimation.scale,
-                                      reverseAnimation: StyledToastAnimation.fade,
-                                      position: StyledToastPosition.center,
-                                      animDuration: Duration(seconds: 1),
-                                      duration: Duration(seconds: 4),
-                                      curve: Curves.elasticOut,
-                                      reverseCurve: Curves.linear,
-                                    );
+                                    ToastNotification.showNotification('Harap Isi Semua Data', context, Colors.red);
                                   } else {
                                     String noHp = noHpField.text;
                                     if(noHpField.text.substring(0,1) == "0")
@@ -225,7 +208,7 @@ class SignInState extends State<SignIn> {
                                     else
                                       noHp = "+62" + noHpField.text;
                                     userService.getUser(noHp, passwordField.text).then((value) {
-                                      if (value.email != "") {
+                                      if (value != null) {
                                         List<String> data = [
                                           value.email,
                                           value.namaUser,
@@ -236,18 +219,7 @@ class SignInState extends State<SignIn> {
                                         Navigator.pushReplacement(
                                             context, MaterialPageRoute(builder: (context) => new MyApp()));
                                       } else {
-                                        showToast('Pengguna Tidak Ditemukan',
-                                          context: context,
-                                          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                          backgroundColor: Colors.red,
-                                          animation: StyledToastAnimation.scale,
-                                          reverseAnimation: StyledToastAnimation.fade,
-                                          position: StyledToastPosition.center,
-                                          animDuration: Duration(seconds: 1),
-                                          duration: Duration(seconds: 4),
-                                          curve: Curves.elasticOut,
-                                          reverseCurve: Curves.linear,
-                                        );
+                                        ToastNotification.showNotification('Pengguna Tidak Ditemukan', context, Colors.red);
                                       }
                                     });
                                   }
