@@ -3,17 +3,18 @@ import 'dart:async';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
+import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/page/tambah_pasien.dart';
+import 'package:sobatku/service/bpjs_service.dart';
 import 'package:sobatku/service/pasien_service.dart';
 import 'package:sobatku/service/user_service.dart';
-
-import '../main.dart';
+import 'halaman_utama.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -24,10 +25,17 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   static final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+  );
   late PasienService pasienService;
   late UserService userService;
   late Future<List<Pasien>> dataFuturePasien;
+  late BpjsService bpjsService;
 
   TextEditingController pwController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -38,8 +46,12 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
+    _initPackageInfo();
+
     pasienService = PasienService();
     userService = UserService();
+    bpjsService = BpjsService();
+
     dataFuturePasien = getPasien();
   }
 
@@ -52,128 +64,112 @@ class _ProfileState extends State<Profile> {
           backgroundColor: Constant.color
       ),
         body: Container(
-          decoration: BoxDecoration(image:
-          DecorationImage(
+          decoration: BoxDecoration(
+            image: DecorationImage(
               image: AssetImage("assets/images/Background.png"),
               alignment: Alignment.center,
-              fit: BoxFit.cover)),
+              fit: BoxFit.cover
+            )
+          ),
           child: Column(
             children: <Widget>[
               Card(
-                color: Colors.transparent,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10))
+                ),
                 elevation: 0,
                 child: ClipPath(
                   child: Column(
                     children: [
                       Container(
-                          height: 100,
-                          child: Row(
-                            children: <Widget>[
-                              Flexible(
-                                  child: SizedBox(
-                                    child: ListTile(
-                                      title: Text(user[1]),
-                                      subtitle: Text(user[0]),
-                                    ),
-                                  )
-                              ),
-                              IconButton(
-                                  icon: Icon(Icons.edit),
-                                  onPressed: () {
-                                    Alert(
-                                        context: context,
-                                        title: "Ubah Data Pengguna",
-                                        content: Form(
-                                          key: _formKey,
-                                          child: Column(
-                                            children: <Widget>[
-                                              TextFormField(
-                                                controller: emailController..text,
-                                                decoration: InputDecoration(
-                                                  icon: Icon(Icons.email),
-                                                  labelText: "Email",
-                                                ),
-                                                validator: (String? value) {
-                                                  if (value == null || value.isEmpty)
-                                                    return 'Mohon Isikan Alamat Email';
-                                                  if(!EmailValidator.validate(value))
-                                                    return 'Alamat Email Tidak Valid';
-                                                  return null;
-                                                },
-                                              ),
-                                              TextFormField(
-                                                controller: pwController,
-                                                obscureText: true,
-                                                decoration: InputDecoration(
-                                                  icon: Icon(Icons.password),
-                                                  labelText: "Kata Sandi",
-                                                ),
-                                                validator: (String? value) {
-                                                  if (value == null || value.isEmpty) {
-                                                    return 'Mohon Isikan Password';
-                                                  }
-                                                  return null;
-                                                },
-                                              ),
-                                            ],
+                        height: 100,
+                        child: Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Container(
+                                child: ListTile(
+                                  title: Text(user[1]),
+                                  subtitle: Text(user[0]),
+                                ),
+                              )
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                Alert(
+                                  context: context,
+                                  title: "Ubah Data Pengguna",
+                                  content: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      children: <Widget>[
+                                        TextFormField(
+                                          controller: emailController..text,
+                                          decoration: InputDecoration(
+                                            icon: Icon(Icons.email),
+                                            labelText: "Email",
                                           ),
+                                          validator: (String? value) {
+                                            if (value == null || value.isEmpty)
+                                              return 'Mohon Isikan Alamat Email';
+                                            if(!EmailValidator.validate(value))
+                                              return 'Alamat Email Tidak Valid';
+                                            return null;
+                                          },
                                         ),
-                                        buttons: [
-                                          DialogButton(
-                                            onPressed: () =>
-                                            {
-                                              if (!_formKey.currentState!.validate()) {
-                                                print("Gagal"),
-                                                showToast('Harap Isi Semua Data',
-                                                  context: context,
-                                                  textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                                  backgroundColor: Colors.red,
-                                                  animation: StyledToastAnimation.scale,
-                                                  reverseAnimation: StyledToastAnimation.fade,
-                                                  position: StyledToastPosition.center,
-                                                  animDuration: Duration(seconds: 1),
-                                                  duration: Duration(seconds: 4),
-                                                  curve: Curves.elasticOut,
-                                                  reverseCurve: Curves.linear,
-                                                )
-                                              } else {
-                                                print("Sukses"),
-                                                userService.updateUser(user[2], emailController.text, pwController.text).then((value) {
-                                                  showToast(value,
-                                                    context: context,
-                                                    textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                                    backgroundColor: Constant.color,
-                                                    animation: StyledToastAnimation.scale,
-                                                    reverseAnimation: StyledToastAnimation.fade,
-                                                    position: StyledToastPosition.center,
-                                                    animDuration: Duration(seconds: 1),
-                                                    duration: Duration(seconds: 4),
-                                                    curve: Curves.elasticOut,
-                                                    reverseCurve: Curves.linear,
-                                                  );
-                                                  updateUSer(emailController.text);}),
-                                                Navigator.pop(context), rebuild(setState)
-                                              }
-                                            },
-                                            child: Text(
-                                              "Simpan",
-                                              style: TextStyle(color: Colors.white, fontSize: 20),
-                                            ),
-                                          )
-                                        ]).show();
-                                  }),
-                            ],
-                          ),
+                                        TextFormField(
+                                          controller: pwController,
+                                          obscureText: true,
+                                          decoration: InputDecoration(
+                                            icon: Icon(Icons.password),
+                                            labelText: "Kata Sandi",
+                                          ),
+                                          validator: (String? value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Mohon Isikan Password';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  buttons: [
+                                    DialogButton(
+                                      onPressed: () =>
+                                      {
+                                        if (!_formKey.currentState!.validate()) {
+                                          ToastNotification.showNotification('Harap Isi Semua Data', context, Colors.red)
+                                        } else {
+                                          userService.updateUser(user[2], emailController.text, pwController.text).then((value) {
+                                            ToastNotification.showNotification(value, context, Constant.color);
+                                            updateUSer(emailController.text);}),
+                                          Navigator.pop(context), rebuild(setState)
+                                        }
+                                      },
+                                      child: Text(
+                                        "Simpan",
+                                        style: TextStyle(color: Colors.white, fontSize: 20),
+                                      ),
+                                    )
+                                  ]).show();
+                            }),
+                          ],
+                        ),
                       ),
                       Row(
                         children: [
                           Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  SharedPreferenceHelper.logOut().then((value) =>  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => new MyApp())));
-                                },
-                                child: Text("Keluar"),
-                                style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color))
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    SharedPreferenceHelper.logOut().then((value) =>  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => new MyApp())));
+                                  },
+                                  child: Text("Keluar"),
+                                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color))
+                                ),
                               )
                           )
                         ],
@@ -186,6 +182,7 @@ class _ProfileState extends State<Profile> {
               ),
               SizedBox(height: 10,),
               Text("Daftar Pasien", style: TextStyle(fontSize: 32)),
+              SizedBox(height: 10,),
               Flexible(
                 child: Container(
                   color: Colors.transparent,
@@ -199,7 +196,7 @@ class _ProfileState extends State<Profile> {
                         );
                       } else if (snapshot.hasData){
                           List<Pasien> patients = snapshot.data;
-                          return _buildListView(patients);
+                          return _buildListPasien(patients);
                       } else {
                         return Center(
                           child: Container(),
@@ -208,14 +205,23 @@ class _ProfileState extends State<Profile> {
                     },
                   ),
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Text(_packageInfo.appName + " Ver " + _packageInfo.version),
+                ),
               )
-            ],
-      ),
+            ]
+          ),
         ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Constant.color,
         onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => TambahPasien())).then((value) => onGoBack(value));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => TambahPasien())).then((value) {
+              onGoBack(value);
+            });
         },
         child: Icon(Icons.add),
       ),
@@ -226,67 +232,99 @@ class _ProfileState extends State<Profile> {
     setState(() {});
   }
 
-  Widget _buildListView(List<Pasien> patients) {
+  Widget _buildListPasien(List<Pasien> daftarPasien) {
     return ListView.separated(
         separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
-        itemCount: patients.length,
+        itemCount: daftarPasien.length,
         itemBuilder: (context, index) {
-          Pasien patient = patients[index];
+          Pasien pasien = daftarPasien[index];
           return Row(
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
+                child: Container(
                   width: 50,
                   height: 50,
-                  child: Placeholder(),
+                  child: pasien.jenisKelamin.toLowerCase() == "l" ? Image.asset("assets/icons/avatar_l.png", fit: BoxFit.fill) : Image.asset("assets/icons/avatar_p.png", fit: BoxFit.fill),
                 ),
               ),
               Flexible(
                 child: Container(
-                  color: Colors.transparent,
                   child: ListTile(
-                    title: Text(patient.namaPasien),
-                    subtitle: Text(patient.nomorRm),
+                    title: Text(pasien.namaPasien, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    subtitle: Column(
+                      children: [
+                        SizedBox(height: 5),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("Nomor RM : " + pasien.nomorRm, style: TextStyle(fontSize: 14))
+                        ),
+                        SizedBox(height: 5),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text("Nomor BPJS : " + pasien.nomorBpjs, style: TextStyle(fontSize: 14))
+                        ),
+                      ],
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () {
-                              noBpjsController.text = patient.nomorBpjs;
-                              Alert(
-                                  context: context,
-                                  title: "Ubah Data Pasien",
-                                  content: Column(
-                                    children: <Widget>[
-                                      TextField(
-                                        controller: noBpjsController..text,
-                                        decoration: InputDecoration(
-                                          icon: Icon(Icons.account_circle),
-                                          labelText: "Nomor BPJS",
-                                        ),
-                                      ),
-                                    ],
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            noBpjsController.text = pasien.nomorBpjs;
+                            Alert(
+                              context: context,
+                              title: "Ubah Nomor BPJS Pasien",
+                              content: Column(
+                                children: <Widget>[
+                                  TextField(
+                                    controller: noBpjsController..text,
+                                    decoration: InputDecoration(
+                                      icon: Icon(Icons.account_circle),
+                                      labelText: "Nomor BPJS",
+                                    ),
                                   ),
-                                  buttons: [
-                                    DialogButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text(
-                                        "Simpan",
-                                        style: TextStyle(color: Colors.white, fontSize: 20),
-                                      ),
-                                    )
-                                  ]).show();
-                            }),
+                                ],
+                              ),
+                              buttons: [
+                                DialogButton(
+                                  onPressed: () {
+                                    bpjsService.cekAtivasi(noBpjsController.text).then((value) {
+                                      if (value == "aktif") {
+                                        pasienService.updateNoBpjs(noBpjsController.text, pasien.nomorRm).then((value) {
+                                          if (value) {
+                                            ToastNotification.showNotification("Berhasil Ubah Nomor BPJS", context, Constant.color);
+                                            Future.delayed(Duration(seconds: 3)).then((value) => Navigator.pop(context));
+                                            setState(() {
+                                              dataFuturePasien = getPasien();
+                                            });
+                                          }
+                                          else
+                                            ToastNotification.showNotification("Gagal Ubah Nomor BPJS", context, Colors.red);
+                                        });
+                                      }
+                                      else
+                                        ToastNotification.showNotification(value.toString(), context, Colors.red);
+                                    });
+                                  },
+                                  child: Text(
+                                    "Simpan",
+                                    style: TextStyle(color: Colors.white, fontSize: 20),
+                                  ),
+                                )
+                              ]).show();
+                          }
+                        ),
                         IconButton(
                           icon: Icon(Icons.delete),
                           onPressed: () {
-                            pasienService.deletePairing(user[2], patient.nomorRm).then((value) {
+                            pasienService.deletePairing(user[2], pasien.nomorRm).then((value) {
                               print(value);
                               rebuild(setState);
                             });
-                          })
+                          }
+                        )
                       ],
                     )
                   ),
@@ -322,5 +360,12 @@ class _ProfileState extends State<Profile> {
   Future<List<Pasien>> getPasien() async {
     await getUserPrefs();
     return pasienService.getPairing(user[2]);
+  }
+
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
   }
 }
