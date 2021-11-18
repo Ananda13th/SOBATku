@@ -8,8 +8,8 @@ import 'package:sobatku/model/transaksi_resp.dart';
 class TransaksiService {
   var baseUrl = URL.devAddress;
 
-  Future<List<TransaksiResp>> getTransaksi(String userId) async {
-    String _finalUrl = baseUrl + "transaksi/$userId";
+  Future<List<TransaksiResp>> getTransaksi(String noRm) async {
+    String _finalUrl = baseUrl + "transaksi/$noRm";
     final response = await http.get
       (Uri.parse(_finalUrl),
       headers: URL.createHeader(),
