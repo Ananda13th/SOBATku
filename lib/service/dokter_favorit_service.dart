@@ -16,7 +16,7 @@ class DokterFavoritService {
       final data = json.decode(response.body);
       return List<DokterFavorit>.from(data['data'].map((dokter) => DokterFavorit.fromJson(dokter)));
     } else {
-      throw Exception("Failed");
+      return List<DokterFavorit>.empty(growable: true);
     }
   }
 
