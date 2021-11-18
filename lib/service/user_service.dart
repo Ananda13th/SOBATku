@@ -7,7 +7,7 @@ import 'package:sobatku/model/user.dart';
 class UserService {
   var baseUrl = URL.devAddress;
 
-  Future<User> getUser(String noHp, String password) async {
+  Future<User?> getUser(String noHp, String password) async {
       String _finalUrl = baseUrl + "user/$noHp/$password";
       final response = await http.get(
           Uri.parse(_finalUrl),
@@ -17,7 +17,7 @@ class UserService {
           final data = json.decode(response.body);
           List<dynamic> array = data['data'];
           if(array.length == 0)
-            return User(password: "", namaUser: "", nomorHp: "", email: "");
+            return null;
           else
             return User.fromJson(data['data'][0]);
       } else {
@@ -51,9 +51,9 @@ class UserService {
     }
   }
 
-  Future<String> resetPassword(String nomorHp) async {
+  Future<String> resetPassword(String nomorHp, String password) async {
     final response = await http.put(
-      Uri.parse(baseUrl + "user/$nomorHp"),
+      Uri.parse(baseUrl + "user/$nomorHp/$password"),
       headers: URL.createHeader(),
     );
     if(response.statusCode == 200) {
