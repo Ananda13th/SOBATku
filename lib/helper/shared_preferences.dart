@@ -15,6 +15,8 @@ class SharedPreferenceHelper {
   static Future<List<String>?> getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? data = prefs.getStringList('user');
+    if(data == null)
+      return ["","",""];
     return data;
   }
 
@@ -48,7 +50,7 @@ class SharedPreferenceHelper {
       return data;
     }
     else {
-      List<String>? data = [""];
+      List<String>? data = List.empty();
       return data;
     }
   }
