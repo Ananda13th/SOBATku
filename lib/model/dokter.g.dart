@@ -11,7 +11,7 @@ Dokter _$DokterFromJson(Map<String, dynamic> json) {
     idDokter: json['id_dokter'] as int,
     namaDokter: json['nama_dokter'] as String,
     kodeDokter: json['kode_dokter'] as String,
-    idSpesialisasi: json['id_spesialisasi'] as int,
+    kodeSpesialisasi: json['kode_spesialisasi'] as String,
     spesialisasi: json['nama_spesialisasi'] as String,
   );
 }
@@ -21,5 +21,5 @@ Map<String, dynamic> _$DokterToJson(Dokter instance) => <String, dynamic>{
       'nama_dokter': instance.namaDokter,
       'nama_spesialisasi': instance.spesialisasi,
       'kode_dokter': instance.kodeDokter,
-      'id_spesialisasi': instance.idSpesialisasi,
+      'kode_spesialisasi': instance.kodeSpesialisasi,
     };

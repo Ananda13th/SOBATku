@@ -11,14 +11,14 @@ class Dokter {
   final String spesialisasi;
   @JsonKey(name: "kode_dokter")
   final String kodeDokter;
-  @JsonKey(name: "id_spesialisasi")
-  final int idSpesialisasi;
+  @JsonKey(name: "kode_spesialisasi")
+  final String kodeSpesialisasi;
 
   Dokter({
     required this.idDokter,
     required this.namaDokter,
     required this.kodeDokter,
-    required this.idSpesialisasi,
+    required this.kodeSpesialisasi,
     required this.spesialisasi});
 
   factory Dokter.fromJson(Map<String,dynamic> data) => _$DokterFromJson(data);
