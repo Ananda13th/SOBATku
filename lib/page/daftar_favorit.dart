@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
@@ -9,16 +7,17 @@ import 'package:sobatku/helper/day_converter.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
 import 'package:sobatku/model/dokter.dart';
 import 'package:sobatku/model/jadwal_dokter.dart';
-import 'package:sobatku/model/pasien.dart';
-import 'package:sobatku/model/transaksi_req.dart';
-import 'package:sobatku/page/sign_in.dart';
+import 'package:sobatku/model/spesialisasi.dart';
 import 'package:sobatku/service/cuti_service.dart';
 import 'package:sobatku/service/dokter_favorit_service.dart';
 import 'package:sobatku/service/dokter_service.dart';
 import 'package:sobatku/service/jadwal_dokter_service.dart';
 import 'package:group_button/group_button.dart';
 import 'package:sobatku/service/pasien_service.dart';
+import 'package:sobatku/service/spesialisasi_service.dart';
 import 'package:sobatku/service/transaksi_service.dart';
+
+import 'jadwal_dokter.dart';
 
 class FavoriteList extends StatefulWidget {
   @override
@@ -26,17 +25,18 @@ class FavoriteList extends StatefulWidget {
 }
 
 class _FavoriteListState extends State<FavoriteList> {
-  List<String> favorite =[""];
+  List<String> favorite = List.empty(growable: true);
   late DokterService doctorService;
   late JadwalService jadwalService;
   late PasienService pasienService;
+  late SpesialisasiService spesialisasiService;
   late DokterFavoritService dokterFavoritService;
   late TransaksiService transaksiService;
   late CutiService cutiService;
-  TextEditingController _searchController = TextEditingController();
   late List<Dokter> doctors;
-  late List<Dokter> tempDoctorData;
+  List<Dokter> tempDoctorData = List.empty(growable: true);
   Future<List<Dokter>>? _doctorData;
+  List<Spesialisasi> daftarSpesialisasi = List.empty(growable: true);
   late bool user =false;
   late String idUser;
   int selectedIndex = 11;
@@ -47,32 +47,39 @@ class _FavoriteListState extends State<FavoriteList> {
     doctorService = DokterService();
     pasienService = PasienService();
     jadwalService = JadwalService();
+    spesialisasiService = SpesialisasiService();
     transaksiService = TransaksiService();
     cutiService = CutiService();
     _doctorData = doctorService.getDokter();
-    _doctorData!.then((value) {
+
+    spesialisasiService.getSpesialisasi().then((value) {
       setState(() {
-        doctors = value;
-        tempDoctorData = List.from(doctors);
+        daftarSpesialisasi= value;
       });
     });
 
     checkUserExist().then((value) {
       setState(() {
         user = value;
+        if(value) {
+          SharedPreferenceHelper.getFavorite().then((value) {
+            setState(() {
+              favorite = value!;
+              _doctorData!.then((dataList) {
+                  dataList.forEach((data) {
+                    if(favorite.contains(data.idDokter.toString()))
+                      tempDoctorData.add(data);
+                  });
+              });
+            });
+          });
+        }
       });
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
-    if(user)
-      SharedPreferenceHelper.getFavorite().then((value) {
-        setState(() {
-            favorite = value!;
-        });
-      });
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -83,11 +90,13 @@ class _FavoriteListState extends State<FavoriteList> {
         ),
         body:
         Container(
-          decoration: BoxDecoration(image:
-          DecorationImage(
+          decoration: BoxDecoration(
+            image: DecorationImage(
               image: AssetImage("assets/images/Background.png"),
               alignment: Alignment.center,
-              fit: BoxFit.fill)),
+              fit: BoxFit.fill
+            )
+          ),
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: FutureBuilder<List<Dokter>>(
@@ -95,7 +104,7 @@ class _FavoriteListState extends State<FavoriteList> {
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if(snapshot.hasError) {
                 return Center(
-                  child: Text("Terjadi Kesalahan"),
+                  child: Text("Terjadi Kesalahan")
                 );
               }
               else if (snapshot.hasData){
@@ -119,41 +128,53 @@ class _FavoriteListState extends State<FavoriteList> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Container(
-          color: Colors.transparent,
-          height: MediaQuery.of(context).size.height*80/100,
-          child: ListView.separated(
-              separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
+        SizedBox(
+          height: 8,
+        ),
+        Expanded(
+          child: Container(
+            color: Colors.transparent,
+            child: ListView.separated(
+              separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.transparent),
               itemCount: doctors.length,
               itemBuilder: (context, index) {
                 Dokter doctor = doctors[index];
-                if(favorite.contains(doctor.idDokter.toString()))
-                  return Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          width: 100,
-                          height: 100,
-                          child: Image.asset("assets/images/profileAvatar.png"),
-                        ),
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  child: Container(
+                    decoration:  BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(12.0),
                       ),
-                      Flexible(
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: SizedBox(
-                            child: InkWell(
-                              child: ListTile(
-                                title: Text(doctor.namaDokter, style: TextStyle(fontSize: 20)),
-                                subtitle: Text(doctor.spesialisasi, style: TextStyle(fontSize: 16)),
+                            width: 100,
+                            height: 100,
+                            child: Image.asset("assets/images/profileAvatar.png"),
+                          ),
+                        ),
+                        Flexible(
+                            child: SizedBox(
+                              child: InkWell(
+                                child: ListTile(
+                                  title: Text(doctor.namaDokter, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.left),
+                                  subtitle: Text(doctor.spesialisasi, style: TextStyle(fontSize: 16)),
+                                ),
+                                onTap: (){_buildDetailDokterDialog(context, jadwalService, doctor);},
                               ),
-                              onTap: (){_buildDetailDokterDialog(context, jadwalService, doctor);},
-                            ),
-                          )
-                      )
-                    ],
-                  );
-                else
-                  return Container();
+                            )
+                        )
+                      ],
+                    ),
+                  ),
+                );
               }
+            ),
           ),
         )
       ],
@@ -186,9 +207,13 @@ class _FavoriteListState extends State<FavoriteList> {
                                     alignment: Alignment.bottomCenter,
                                     child: Padding(
                                       padding: const EdgeInsets.only(bottom: 20),
-                                      child: Text(
-                                          dokter.namaDokter,
-                                          style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 24)
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5, right: 5),
+                                        child: Text(
+                                            dokter.namaDokter,
+                                            style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20),
+                                            textAlign: TextAlign.center,
+                                        ),
                                       ),
                                     ),
                                   )
@@ -197,8 +222,8 @@ class _FavoriteListState extends State<FavoriteList> {
                           ],
                         ),
                         SizedBox(height: 10),
-                        Text(dokter.spesialisasi, style:TextStyle(fontSize: 20)),
-                        SizedBox(height: 20),
+                        Text(dokter.spesialisasi, style:TextStyle(fontSize: 18)),
+                        SizedBox(height: 10),
                         Divider(
                           color: Colors.black,
                           thickness: 2,
@@ -211,25 +236,27 @@ class _FavoriteListState extends State<FavoriteList> {
                         FutureBuilder<List<JadwalDokter>>(
                             future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
                             builder: (BuildContext context, AsyncSnapshot snapshot) {
+                              if(snapshot.hasError)
+                                return Container(
+                                  width: 300,
+                                  height: 290,
+                                  child: Center(child: Text("Terjadi Kesalahan")),
+                                );
                               if(snapshot.hasData){
-                                List<JadwalDokter> schedules = snapshot.data;
-                                if(schedules.length == 0) {
-                                  return Center(
-                                      child: Container(
-                                          width: 300,
-                                          height: MediaQuery.of(context).size.height*50/100,
-                                          child: Center(child: Text("Belum Ada Jadwal"))
-                                      )
+                                List<JadwalDokter> listJadwalDokter = snapshot.data;
+                                if(listJadwalDokter.isEmpty)
+                                  return Container(
+                                    width: 300,
+                                    height: 290,
+                                    child: Center(child: Text("Belum Ada Jadwal", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
                                   );
-                                }
-                                return _buildListJadwal(schedules);
+                                else
+                                  return _buildListJadwal(listJadwalDokter, dokter);
                               } else {
-                                return Center(
-                                    child: Container(
-                                        width: 300,
-                                        height: 290,
-                                        child: Center(child: Text("Terjadi Kesalahan"))
-                                    )
+                                return Container(
+                                  width: 300,
+                                  height: 290,
+                                  child: Center(child: Image.network("https://c.tenor.com/K2UGDd4acJUAAAAM/load-loading.gif", fit: BoxFit.scaleDown)),
                                 );
                               }
                             }
@@ -248,7 +275,7 @@ class _FavoriteListState extends State<FavoriteList> {
                 child: Image.asset("assets/images/profileAvatar.png"),
               ),
             ),
-        ]
+          ]
         );
       },
     );
@@ -256,18 +283,36 @@ class _FavoriteListState extends State<FavoriteList> {
 
   /*------------ Menampilkan Jadwal Dokter ------------*/
 
-  Widget _buildListJadwal(List<JadwalDokter> jadwalDokter) {
+  Widget _buildListJadwal(List<JadwalDokter> jadwalDokter, Dokter dokter) {
+
+    String tanggal = "";
+    final now = DateTime.now();
+    final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
+    List dayList = List.generate(15, (index) => index)
+        .map((value) => DateFormat('yyyy-MM-dd')
+        .format(firstDayOfWeek.add(Duration(days: value))))
+        .toList();
+
+    List listTanggalFormatTampil = List.generate(15, (index) => index)
+        .map((value) => DateFormat('dd MMMM yyyy')
+        .format(firstDayOfWeek.add(Duration(days: value))))
+        .toList();
+
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.height*50/100,
+            height: MediaQuery.of(context).size.height*45/100,
             width: 300,
             child: ListView.separated(
                 separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
                 itemCount: jadwalDokter.length,
                 itemBuilder: (context, index) {
                   JadwalDokter jadwal = jadwalDokter[index];
+                  if(jadwal.hari < now.weekday)
+                    tanggal = dayList[jadwal.hari + 7];
+                  else
+                    tanggal = dayList[jadwal.hari];
                   return Column(
                     children: [
                       Row(
@@ -276,9 +321,16 @@ class _FavoriteListState extends State<FavoriteList> {
                               child: SizedBox(
                                 child: ListTile(
                                   title: Center(
-                                      child: Text(
-                                          DayConverter.convertToDay(jadwal.hari),
-                                          style: TextStyle(fontWeight: FontWeight.bold)
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            DayConverter.convertToDay(jadwal.hari),
+                                            style: TextStyle(fontWeight: FontWeight.bold)
+                                          ),
+                                          Text(
+                                              jadwal.hari < now.weekday ? listTanggalFormatTampil[jadwal.hari + 7] : listTanggalFormatTampil[jadwal.hari]
+                                          )
+                                        ],
                                       )
                                   ),
                                 ),
@@ -286,7 +338,7 @@ class _FavoriteListState extends State<FavoriteList> {
                           )
                         ],
                       ),
-                      _buttonView(jadwal, context)
+                      _buttonView(jadwal, tanggal, dokter, context)
                     ],
                   );
                 }
@@ -297,20 +349,27 @@ class _FavoriteListState extends State<FavoriteList> {
     );
   }
 
-  Widget _buttonView (JadwalDokter schedule, BuildContext context) {
+  Widget _buttonView (JadwalDokter jadwalDokter, String tanggal, Dokter dokter, BuildContext context) {
     List<String> value = [];
-    value = schedule.jadwalPraktek.map((e) => e.jam).toList();
+    value = jadwalDokter.jadwalPraktek.map((e) => e.jam).toList();
     if(user) {
       return GroupButton(
         selectedColor: Constant.color,
         selectedTextStyle:TextStyle(color: Colors.white),
         spacing: 10,
         direction: Axis.horizontal,
-        unselectedColor: Colors.lightGreen,
+        unselectedColor: Colors.lightGreen[300],
         borderRadius: BorderRadius.circular(30),
         isRadio: true,
         buttons: value,
-        onSelected: (int index, bool isSelected) {_buildPasienListDialog(context, schedule, schedule.jadwalPraktek[index].jam);},
+        onSelected: (int index, bool isSelected) {
+          List<JadwalDokter> data = [jadwalDokter];
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => JadwalSpesifik(dataJadwalDokter: data, tanggalDipilih: DateTime.parse(tanggal), listSpesialisasi: daftarSpesialisasi, idSpesialisasi: dokter.kodeSpesialisasi, namaSpesialisasi: dokter.spesialisasi),)
+          );
+        },
       );
     } else {
       return GroupButton(
@@ -322,7 +381,7 @@ class _FavoriteListState extends State<FavoriteList> {
         borderRadius: BorderRadius.circular(30),
         isRadio: true,
         buttons: value,
-        onSelected: (int index, bool isSelected) {_buildAlert(context);},
+        onSelected: (int index, bool isSelected) {Constant.alertBelumLogin(context);},
       );
     }
   }
@@ -337,309 +396,261 @@ class _FavoriteListState extends State<FavoriteList> {
     else
       return false;
   }
-
-  Future<String> getCurrentUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? _user = prefs.getStringList("user");
-    return _user![2];
-  }
-
-  /*------------ Alert Bila Belum Login ------------*/
-
-  Future<void> _buildAlert(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return SimpleDialog(
-          title: Center(child: const Text('Harap Masuk Dahulu')),
-          children: <Widget>[
-            Column(
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              onPressed: (){ Navigator.of(context).push(
-                                  new MaterialPageRoute(builder: (context) => new SignIn()));},
-                              style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color)),
-                              child: Center(child: const Text('Masuk', style: TextStyle(fontWeight: FontWeight.bold)))
-                          ),
-                        )
-                    )
-                  ],
-                ),
-              ],
-            )
-          ],
-        );
-      },
-    );
-  }
-
   /*------------ Menampilkan Pasien Dan Metode Pembayaran Sebelum Daftar ------------*/
 
-  Future<void> _buildPasienListDialog(BuildContext context, JadwalDokter jadwalDokter, String jam) async {
-    final now = DateTime.now();
-    List<String> data = ["Asuransi", "Umum", "BPJS"];
-    List<String> value = ["2", "3", "9"];
-    String kodeJadwal = "";
-    String tipe = "";
-    String noRm = "";
-    bool cuti = false;
-    String tanggalDipilih = "";
-    final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
-    List dayList = List.generate(15, (index) => index)
-        .map((value) => DateFormat('dd')
-        .format(firstDayOfWeek.add(Duration(days: value))))
-        .toList();
-    if(jadwalDokter.hari < now.weekday) {
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
-      tanggalDipilih =  DateFormat('yyyy-MM').format(now) + "-" + dayList[jadwalDokter.hari + 7];
-    }
-    else {
-      kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0, 2);
-      tanggalDipilih =  DateFormat('yyyy-MM').format(now) + "-" + dayList[jadwalDokter.hari];
-    }
-    print("Kode Jadwal : "+kodeJadwal);
-
-    await cutiService.cekCuti(kodeJadwal).then((value) {
-      cuti = value;
-    });
-
-    if(cuti == true) {
-      showToast("Maaf, Dokter Sedang Cuti",
-          context: context,
-          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-          backgroundColor: Colors.red,
-          animation: StyledToastAnimation.scale,
-          reverseAnimation: StyledToastAnimation.fade,
-          position: StyledToastPosition.center,
-          animDuration: Duration(seconds: 1),
-          duration: Duration(seconds: 4),
-          curve: Curves.elasticOut,
-          reverseCurve: Curves.linear);
-    }
-    else
-    if (user) {
-      SharedPreferenceHelper.getUser().then((value) {
-        setState(() {
-          idUser = value![2];
-        });
-      });
-      await showDialog(
-        context: context,
-        builder: (context) {
-          return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return AlertDialog(
-                    contentPadding: EdgeInsets.zero,
-                    content:
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 40,
-                                color: Constant.color,
-                                child: Center(
-                                  child: Text("Pilih Pasien",
-                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        FutureBuilder(
-                          future: pasienService.getPairing(idUser),
-                          builder: (BuildContext context,
-                              AsyncSnapshot snapshot) {
-                            if (snapshot.hasError) {
-                              return Center(
-                                child: Text("Error"),
-                              );
-                            }
-                            else if (snapshot.hasData) {
-                              List<Pasien> patients = snapshot.data;
-                              return Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: 180,
-                                child: ListView.separated(
-                                    separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1, height: 5),
-                                    itemCount: patients.length,
-                                    itemBuilder: (context, index) {
-                                      Pasien patient = patients[index];
-                                      return Row(
-                                        children: <Widget>[
-                                          Flexible(
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedIndex = index;
-                                                  noRm = patient.nomorRm;
-                                                });
-                                              },
-                                              child: Container(
-                                                width: MediaQuery.of(context).size.width,
-                                                child: ListTile(
-                                                  title: Padding(
-                                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                                    child: Center(
-                                                      child: Text(
-                                                        patient.namaPasien,
-                                                        style: TextStyle(
-                                                          color:  selectedIndex == index ? Constant.color : Colors.black,
-                                                          fontWeight: FontWeight.bold
-                                                        )
-                                                      )
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            )
-                                          )
-                                        ],
-                                      );
-                                    }
-                                ),
-                              );
-                            }
-                            else {
-                              return Center(
-                                child: Container(),
-                              );
-                            }
-                          },
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 40,
-                                color: Constant.color,
-                                child: Center(
-                                  child: Text("Pilih Pembayaran",
-                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                            height: 10
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 80,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 10, right: 10),
-                                  child: GroupButton(
-                                      selectedColor: Constant.color,
-                                      selectedTextStyle: TextStyle(
-                                          color: Colors.white),
-                                      spacing: 10,
-                                      direction: Axis.horizontal,
-                                      unselectedColor: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(30),
-                                      isRadio: true,
-                                      buttons: data,
-                                      onSelected: (int index, bool isSelected) {
-                                        tipe = value[index];
-                                      }
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                            height: 10
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ElevatedButton(
-                                    style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all<
-                                            Color>(Constant.color)),
-                                    onPressed: () {
-                                      TransaksiReq transaksi = new TransaksiReq(
-                                          kodeJadwal: kodeJadwal,
-                                          kodeDokter: jadwalDokter.kodeDokter,
-                                          nomorRm: noRm,
-                                          tipe: tipe);
-                                      transaksiService.createTransaksi(
-                                          transaksi, idUser).then(
-                                              (value) {
-                                            Color color = Constant.color;
-                                            if (value != "Antrian berhasil dibuat.")
-                                              color = Colors.red;
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                                SnackBar(
-                                                    duration: Duration(seconds: 2),
-                                                    backgroundColor: color,
-                                                    content: Text(value,
-                                                        style: TextStyle(
-                                                            fontSize: 16,
-                                                            fontWeight: FontWeight
-                                                                .bold,
-                                                            color: Colors.white))
-                                                )
-                                            );
-                                            Future.delayed(
-                                                Duration(seconds: 3), () {
-                                              // 5 seconds over, navigate to Page2.
-                                              Navigator.pop(context);
-                                            });
-                                          }
-                                      );
-                                    },
-                                    child: Text("Daftar")),
-                              ),
-                            )
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ElevatedButton(
-                                    style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all<
-                                            Color>(Colors.grey)),
-                                    onPressed: () {
-                                      if (Navigator.canPop(context)) {
-                                        Navigator.pop(context);
-                                      } else {
-                                        SystemNavigator.pop();
-                                      }
-                                    },
-                                    child: Text("Batal", style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold))),
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    )
-                );
-              }
-            )
-          );
-        },
-      );
-    }
-  }
+  // Future<void> _buildPasienListDialog(BuildContext context, JadwalDokter jadwalDokter, String jam) async {
+  //   final now = DateTime.now();
+  //   List<String> data = ["Asuransi", "Umum", "BPJS"];
+  //   List<String> value = ["2", "3", "9"];
+  //   String kodeJadwal = "";
+  //   String tipe = "";
+  //   String noRm = "";
+  //   bool cuti = false;
+  //   final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
+  //   List dayList = List.generate(15, (index) => index)
+  //       .map((value) => DateFormat('dd')
+  //       .format(firstDayOfWeek.add(Duration(days: value))))
+  //       .toList();
+  //
+  //   List yearMonthList = List.generate(15, (index) => index)
+  //       .map((value) => DateFormat('yyMM')
+  //       .format(firstDayOfWeek.add(Duration(days: value))))
+  //       .toList();
+  //
+  //   if(jadwalDokter.hari < now.weekday) {
+  //     kodeJadwal = jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari+7] + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
+  //   }
+  //   else {
+  //     kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat('yyMM').format(now) + dayList[jadwalDokter.hari] + jam.substring(0, 2);
+  //   }
+  //   print("Kode Jadwal : "+kodeJadwal);
+  //
+  //   await cutiService.cekCuti(kodeJadwal).then((value) {
+  //     cuti = value;
+  //   });
+  //
+  //   if(cuti == true) {
+  //     ToastNotification.showNotification('Maaf Dokter Sedang Cuti', context, Colors.red);
+  //   }
+  //   else
+  //   if (user) {
+  //     SharedPreferenceHelper.getUser().then((value) {
+  //       setState(() {
+  //         idUser = value![2];
+  //       });
+  //     });
+  //     await showDialog(
+  //       context: context,
+  //       builder: (context) {
+  //         return Scaffold(
+  //             backgroundColor: Colors.transparent,
+  //             body: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+  //               return AlertDialog(
+  //                   contentPadding: EdgeInsets.zero,
+  //                   content:
+  //                   Column(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: [
+  //                       Row(
+  //                         children: [
+  //                           Expanded(
+  //                             child: Container(
+  //                               height: 40,
+  //                               color: Constant.color,
+  //                               child: Center(
+  //                                 child: Text("Pilih Pasien",
+  //                                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+  //                               ),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       FutureBuilder(
+  //                         future: pasienService.getPairing(idUser),
+  //                         builder: (BuildContext context,
+  //                             AsyncSnapshot snapshot) {
+  //                           if (snapshot.hasError) {
+  //                             return Center(
+  //                               child: Text("Error"),
+  //                             );
+  //                           }
+  //                           else if (snapshot.hasData) {
+  //                             List<Pasien> patients = snapshot.data;
+  //                             return Container(
+  //                               width: MediaQuery.of(context).size.width,
+  //                               height: 180,
+  //                               child: ListView.separated(
+  //                                   separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1, height: 5),
+  //                                   itemCount: patients.length,
+  //                                   itemBuilder: (context, index) {
+  //                                     Pasien patient = patients[index];
+  //                                     return Row(
+  //                                       children: <Widget>[
+  //                                         Flexible(
+  //                                           child: InkWell(
+  //                                             onTap: () {
+  //                                               setState(() {
+  //                                                 selectedIndex = index;
+  //                                                 noRm = patient.nomorRm;
+  //                                               });
+  //                                             },
+  //                                             child: Container(
+  //                                               width: MediaQuery.of(context).size.width,
+  //                                               child: ListTile(
+  //                                                 title: Padding(
+  //                                                   padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+  //                                                   child: Center(
+  //                                                     child: Text(
+  //                                                       patient.namaPasien,
+  //                                                       style: TextStyle(
+  //                                                         color:  selectedIndex == index ? Constant.color : Colors.black,
+  //                                                         fontWeight: FontWeight.bold
+  //                                                       )
+  //                                                     )
+  //                                                   ),
+  //                                                 ),
+  //                                               ),
+  //                                             ),
+  //                                           )
+  //                                         )
+  //                                       ],
+  //                                     );
+  //                                   }
+  //                               ),
+  //                             );
+  //                           }
+  //                           else {
+  //                             return Center(
+  //                               child: Container(),
+  //                             );
+  //                           }
+  //                         },
+  //                       ),
+  //                       Row(
+  //                         children: [
+  //                           Expanded(
+  //                             child: Container(
+  //                               height: 40,
+  //                               color: Constant.color,
+  //                               child: Center(
+  //                                 child: Text("Pilih Pembayaran",
+  //                                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+  //                               ),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       SizedBox(
+  //                           height: 10
+  //                       ),
+  //                       Row(
+  //                         children: [
+  //                           Expanded(
+  //                             child: Container(
+  //                               height: 80,
+  //                               child: Padding(
+  //                                 padding: const EdgeInsets.only(left: 10, right: 10),
+  //                                 child: GroupButton(
+  //                                     selectedColor: Constant.color,
+  //                                     selectedTextStyle: TextStyle(
+  //                                         color: Colors.white),
+  //                                     spacing: 10,
+  //                                     direction: Axis.horizontal,
+  //                                     unselectedColor: Colors.grey[300],
+  //                                     borderRadius: BorderRadius.circular(30),
+  //                                     isRadio: true,
+  //                                     buttons: data,
+  //                                     onSelected: (int index, bool isSelected) {
+  //                                       tipe = value[index];
+  //                                     }
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           )
+  //                         ],
+  //                       ),
+  //                       SizedBox(
+  //                           height: 10
+  //                       ),
+  //                       Row(
+  //                         children: [
+  //                           Expanded(
+  //                             child: Padding(
+  //                               padding: const EdgeInsets.all(8.0),
+  //                               child: ElevatedButton(
+  //                                   style: ButtonStyle(
+  //                                       backgroundColor: MaterialStateProperty.all<
+  //                                           Color>(Constant.color)),
+  //                                   onPressed: () {
+  //                                     TransaksiReq transaksi = new TransaksiReq(
+  //                                         kodeJadwal: kodeJadwal,
+  //                                         kodeDokter: jadwalDokter.kodeDokter,
+  //                                         nomorRm: noRm,
+  //                                         tipe: tipe);
+  //                                     transaksiService.createTransaksi(
+  //                                         transaksi, idUser).then(
+  //                                             (value) {
+  //                                           Color color = Constant.color;
+  //                                           if (value != "Antrian berhasil dibuat.")
+  //                                             color = Colors.red;
+  //                                           ScaffoldMessenger.of(context)
+  //                                               .showSnackBar(
+  //                                               SnackBar(
+  //                                                   duration: Duration(seconds: 2),
+  //                                                   backgroundColor: color,
+  //                                                   content: Text(value,
+  //                                                       style: TextStyle(
+  //                                                           fontSize: 16,
+  //                                                           fontWeight: FontWeight
+  //                                                               .bold,
+  //                                                           color: Colors.white))
+  //                                               )
+  //                                           );
+  //                                           Future.delayed(
+  //                                               Duration(seconds: 3), () {
+  //                                             // 5 seconds over, navigate to Page2.
+  //                                             Navigator.pop(context);
+  //                                           });
+  //                                         }
+  //                                     );
+  //                                   },
+  //                                   child: Text("Daftar")),
+  //                             ),
+  //                           )
+  //                         ],
+  //                       ),
+  //                       Row(
+  //                         children: [
+  //                           Expanded(
+  //                             child: Padding(
+  //                               padding: const EdgeInsets.all(8.0),
+  //                               child: ElevatedButton(
+  //                                   style: ButtonStyle(
+  //                                       backgroundColor: MaterialStateProperty.all<
+  //                                           Color>(Colors.grey)),
+  //                                   onPressed: () {
+  //                                     if (Navigator.canPop(context)) {
+  //                                       Navigator.pop(context);
+  //                                     } else {
+  //                                       SystemNavigator.pop();
+  //                                     }
+  //                                   },
+  //                                   child: Text("Batal", style: TextStyle(
+  //                                       color: Colors.white,
+  //                                       fontWeight: FontWeight.bold))),
+  //                             ),
+  //                           )
+  //                         ],
+  //                       )
+  //                     ],
+  //                   )
+  //               );
+  //             }
+  //           )
+  //         );
+  //       },
+  //     );
+  //   }
+  // }
 }
 
