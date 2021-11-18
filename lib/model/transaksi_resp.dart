@@ -10,6 +10,8 @@ class TransaksiResp{
   final String nomorRm;
   final String spesialis;
   final String antrian;
+  @JsonKey(name: "antrian_sekarang")
+  final String antrianBerjalan;
   @JsonKey(name: "tipe_pembayaran")
   final String tipePembayaran;
   String tanggal;
@@ -30,6 +32,7 @@ class TransaksiResp{
     required this.notifikasi,
     required this.waktu,
     required this.antrian,
+    required this.antrianBerjalan,
     required this.kodeJadwal,
     required this.namaPasien});
 

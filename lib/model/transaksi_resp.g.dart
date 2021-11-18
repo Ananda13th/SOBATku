@@ -17,6 +17,7 @@ TransaksiResp _$TransaksiRespFromJson(Map<String, dynamic> json) {
     notifikasi: json['notifikasi'] as String,
     waktu: json['waktu'] as String,
     antrian: json['antrian'] as String,
+    antrianBerjalan: json['antrian_sekarang'] as String,
     kodeJadwal: json['kode_jadwal'] as String,
     namaPasien: json['nama_pasien'] as String,
   );
@@ -29,6 +30,7 @@ Map<String, dynamic> _$TransaksiRespToJson(TransaksiResp instance) =>
       'nomor_rm': instance.nomorRm,
       'spesialis': instance.spesialis,
       'antrian': instance.antrian,
+      'antrian_sekarang': instance.antrianBerjalan,
       'tipe_pembayaran': instance.tipePembayaran,
       'tanggal': instance.tanggal,
       'waktu': instance.waktu,
