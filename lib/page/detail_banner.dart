@@ -4,6 +4,7 @@ import 'package:sizer/sizer.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/model/banner.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetailBanner extends StatelessWidget {
 
@@ -40,7 +41,7 @@ class DetailBanner extends StatelessWidget {
                                     return DetailScreen(image: bannerModel.url);
                                   }));
                                 },
-                                child: keterangan == "Banner" ? Image.network(bannerModel.urlDetailBanner.toString(), fit: BoxFit.fill) : Image.network(bannerModel.url)
+                                child: keterangan == "Banner" ? Image.network(bannerModel.urlDetailBanner.toString(), fit: BoxFit.fill) : Image.network(bannerModel.url, fit: BoxFit.fill)
                               ),
                             ),
                           )
@@ -49,7 +50,17 @@ class DetailBanner extends StatelessWidget {
                       SizedBox(height: 20),
                       Padding(
                         padding: const EdgeInsets.all(10.0),
-                        child: Text(bannerModel.deskripsi, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,), textAlign: TextAlign.justify),
+                        child: Column(
+                          children: [
+                            Text(bannerModel.deskripsi, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,), textAlign: TextAlign.justify),
+                            TextButton(
+                              onPressed: (){
+                                if(bannerModel.urlSumberBerita != null)
+                                  _launchURL(bannerModel.urlSumberBerita.toString());
+                              },
+                              child: bannerModel.urlSumberBerita != null ? Text("Lihat Selengkapnya", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)) : Text(""))
+                          ],
+                        ),
                       )
                     ],
                   ),
@@ -60,6 +71,15 @@ class DetailBanner extends StatelessWidget {
         );
       }
     );
+  }
+}
+
+Future<void> _launchURL(String url) async {
+  final String link = url;
+  if (await canLaunch(link)) {
+    await launch(url, forceWebView: true, enableJavaScript: true);
+  } else {
+    throw 'Could not launch $url';
   }
 }
 

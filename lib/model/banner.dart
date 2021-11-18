@@ -6,12 +6,15 @@ class BannerModel {
   final String url;
   @JsonKey(name: "url_detail_banner")
   final String? urlDetailBanner;
+  @JsonKey(name: "url_sumber")
+  final String? urlSumberBerita;
   final String deskripsi;
   final String keterangan;
 
   BannerModel({
     required this.url,
     required this.urlDetailBanner,
+    required this.urlSumberBerita,
     required this.deskripsi,
     required this.keterangan
   });
