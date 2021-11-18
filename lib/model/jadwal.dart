@@ -3,9 +3,9 @@ part 'jadwal.g.dart';
 
 @JsonSerializable()
 class Jadwal {
-  final String jam;
+  late String jam;
   @JsonKey(name: "id")
-  final String kodeJadwal;
+  final int kodeJadwal;
   final String aktif;
 
   Jadwal({

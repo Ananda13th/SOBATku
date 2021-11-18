@@ -9,7 +9,7 @@ part of 'jadwal.dart';
 Jadwal _$JadwalFromJson(Map<String, dynamic> json) {
   return Jadwal(
     jam: json['jam'] as String,
-    kodeJadwal: json['id'] as String,
+    kodeJadwal: json['id'] as int,
     aktif: json['aktif'] as String,
   );
 }
