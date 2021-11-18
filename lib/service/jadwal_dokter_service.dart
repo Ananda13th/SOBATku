@@ -6,15 +6,15 @@ import 'package:sobatku/model/jadwal_dokter.dart';
 class JadwalService {
   var baseUrl = URL.devAddress;
 
-  Future<List<JadwalDokter>> getJadwalDokter(String idSpesialisasi, String hari) async {
+  Future<List<JadwalDokter>> getJadwalDokter(String kodeSpesialisasi, String hari) async {
     final response = await http.get(
-      Uri.parse(baseUrl + "jadwal/$idSpesialisasi/$hari"),
+      Uri.parse(baseUrl + "jadwal/$kodeSpesialisasi/$hari"),
       headers: URL.createHeader(),);
     if(response.statusCode == 200) {
       final data = json.decode(response.body);
       return List<JadwalDokter>.from(data['data'].map((jadwal) => JadwalDokter.fromJson(jadwal)));
     } else {
-      throw Exception("Failed");
+      return List<JadwalDokter>.empty();
     }
   }
 
@@ -27,7 +27,7 @@ class JadwalService {
       final data = json.decode(response.body);
       return List<JadwalDokter>.from(data['data'].map((jadwal) => JadwalDokter.fromJson(jadwal)));
     } else {
-      throw Exception("Failed");
+      return List<JadwalDokter>.empty();
     }
   }
 }
