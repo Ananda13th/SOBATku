@@ -2,18 +2,21 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:intl/intl.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
+import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/page/sign_in.dart';
 import 'package:sobatku/service/user_service.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:rflutter_alert/rflutter_alert.dart' hide AnimationType;
+
 
 class TampilanKonfirmasiPin extends StatefulWidget {
   final String? phoneNumber;
-  TampilanKonfirmasiPin(this.phoneNumber);
+  final String? keterangan;
+  TampilanKonfirmasiPin(this.phoneNumber, this.keterangan);
 
   @override
   _TampilanKonfirmasiPinState createState() =>
@@ -25,6 +28,8 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
   late String bannedDate;
   bool showCountdown = false;
   TextEditingController textEditingController = TextEditingController();
+  TextEditingController pwController = TextEditingController();
+  static final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   int clicked = 0;
 
   StreamController<ErrorAnimationType>? errorController;
@@ -52,7 +57,7 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
     super.dispose();
   }
 
-  // snackBar Widget
+  /// MENAMPILKAN SNACKBAR ///
   snackBar(String? message) {
     return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -205,18 +210,7 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
                   TextButton(
                     onPressed: () {
                       if(clicked == 3 || bannedDate == DateFormat("dd-MM-yyyy").format(DateTime.now()))
-                        showToast('Maaf, Sudah Melebihi Batas Permintaan Kode.\nSilahkan Hubungi Pusat Informasi',
-                          context: context,
-                          textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                          backgroundColor: Colors.red,
-                          animation: StyledToastAnimation.scale,
-                          reverseAnimation: StyledToastAnimation.fade,
-                          position: StyledToastPosition.center,
-                          animDuration: Duration(seconds: 1),
-                          duration: Duration(seconds: 4),
-                          curve: Curves.elasticOut,
-                          reverseCurve: Curves.linear,
-                        );
+                        ToastNotification.showNotification('Maaf, Sudah Melebihi Batas Permintaan Kode.\nSilahkan Hubungi Pusat Informasi', context, Colors.red);
                       else {
                         userService.resendOtp(widget.phoneNumber.toString()).then((value) => snackBar(value));
                         WidgetsBinding.instance!.addPostFrameCallback((_){
@@ -269,10 +263,59 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
                               hasError = false;
                               snackBar(value);
                             });
-                            Future.delayed(Duration(seconds: 3)).then( (value) =>
-                                Navigator.of(context).pushReplacement(
-                                    new MaterialPageRoute(builder: (context) => new SignIn()))
-                            );
+                            if(widget.keterangan == "reset") {
+                              Alert(
+                                  context: context,
+                                  title: "Reset Password",
+                                  content: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      children: <Widget>[
+                                        TextFormField(
+                                          controller: pwController,
+                                          obscureText: true,
+                                          decoration: InputDecoration(
+                                            icon: Icon(Icons.password),
+                                            labelText: "Kata Sandi",
+                                          ),
+                                          validator: (String? value) {
+                                            if (value == null || value.isEmpty) {
+                                              return 'Mohon Isikan Password';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  buttons: [
+                                    DialogButton(
+                                      onPressed: () =>
+                                      {
+                                        if (!_formKey.currentState!.validate()) {
+                                          ToastNotification.showNotification('Harap Isi Semua Data', context, Colors.red)
+                                        } else {
+                                          print("Sukses"),
+                                          userService.resetPassword(widget.phoneNumber.toString() , pwController.text),
+                                          Future.delayed(Duration(seconds: 3)).then((value) =>
+                                              Navigator.of(context).pushReplacement(
+                                                  new MaterialPageRoute(builder: (context) => new SignIn()))
+                                          )
+                                        }
+                                      },
+                                      child: Text(
+                                        "Simpan",
+                                        style: TextStyle(color: Colors.white, fontSize: 20),
+                                      ),
+                                    )
+                                  ]).show();
+                            } else {
+                              print("false");
+                              Future.delayed(Duration(seconds: 3)).then((value) =>
+                                  Navigator.of(context).pushReplacement(
+                                      new MaterialPageRoute(builder: (context) => new SignIn()))
+                              );
+                            }
                           }
                         });
                       }
