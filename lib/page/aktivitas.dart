@@ -9,6 +9,7 @@ import 'package:screen/screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/model/transaksi_resp.dart';
+import 'package:sobatku/service/pasien_service.dart';
 import 'package:sobatku/service/transaksi_service.dart';
 
 class Aktivitas extends StatefulWidget {
@@ -22,17 +23,34 @@ class _AktivitasState extends State<Aktivitas> {
   late TransaksiService transaksiService;
   late List<String> user = ["","",""];
   late Future _dataFuture;
+  late PasienService pasienService;
+  List<TransaksiResp> daftarTransaksi = List.empty(growable: true);
 
   @override
   void initState() {
     super.initState();
     transaksiService = TransaksiService();
+    pasienService = PasienService();
     _dataFuture = _getService();
+
+    _dataFuture.then((result) {
+        result.forEach((pasien) {
+          transaksiService.getTransaksi(pasien.nomorRm).then((value) {
+            value.forEach((element) {
+              setState(() {
+                daftarTransaksi.add(element);
+                print(daftarTransaksi.length);
+              });
+            });
+          });
+        });
+    });
   }
 
   _getService() async {
     await getUserPrefs();
-    return transaksiService.getTransaksi(user[2]);
+    return pasienService.getPairing(user[2]);
+    //return transaksiService.getTransaksi(user[2]);
   }
 
   @override
@@ -71,7 +89,7 @@ class _AktivitasState extends State<Aktivitas> {
                               child: Text("Error"),
                             );
                           } else if (snapshot.hasData){
-                            List<TransaksiResp> response = snapshot.data;
+                            List<TransaksiResp> response =daftarTransaksi;
                             List<TransaksiResp> aktif =  List.empty(growable: true);
                             DateTime now = DateTime.now();
                             response.forEach((element) {
@@ -111,7 +129,7 @@ class _AktivitasState extends State<Aktivitas> {
                               child: Text("Error"),
                             );
                           } else if (snapshot.hasData) {
-                            List<TransaksiResp> response = snapshot.data;
+                            List<TransaksiResp> response = daftarTransaksi;
                             List<TransaksiResp> riwayat = List.empty(growable: true);
                             DateTime now = DateTime.now();
                             response.forEach((element) {
@@ -147,7 +165,7 @@ class _AktivitasState extends State<Aktivitas> {
           TransaksiResp tResp = response[index];
           return Row(
             children: <Widget>[
-              Flexible(
+              Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
@@ -172,8 +190,10 @@ class _AktivitasState extends State<Aktivitas> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    Text("No. Antrian", style: TextStyle(fontSize: 12)),
+                    Text("No. Antrian Anda", style: TextStyle(fontSize: 12)),
                     Text(tResp.antrian, style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
+                    Text("Antrian Berjalan", style: TextStyle(fontSize: 12)),
+                    Text(tResp.antrianBerjalan, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     tipe == "aktif" ?
                     InkWell(
                       onTap: (){_buildQr(context, tResp).then((value) => Screen.setBrightness(value));},
