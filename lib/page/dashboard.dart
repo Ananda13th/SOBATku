@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:scroll_indicator/scroll_indicator.dart';
 import 'package:sizer/sizer.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
@@ -27,12 +27,13 @@ class HomeView extends StatefulWidget {
 
 class HomeViewState extends State<HomeView> {
   List<String> listDokterFavorit =[""];
+  ScrollController scrollController = ScrollController();
   int currentIndex = 0;
   late BannerService bannerService;
   late DokterFavoritService dokterFavoritService;
   late SpesialisasiService spesialisasiService;
   late JadwalService jadwalService;
-  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", urlDetailBanner:"", deskripsi: "", keterangan: "");
+  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", urlDetailBanner:"", urlSumberBerita:"", deskripsi: "", keterangan: "");
   late List<String> listBannerPromoTest = ["assets/images/promo1.jpeg","assets/images/promo2.jpeg", "assets/images/promo3.jpeg", "assets/images/promo4.jpeg", "assets/images/promo5.jpeg", "assets/images/promo6.jpeg"];
   late List<String> listBannerTest = ["assets/images/Banner.png"];
   late List<BannerModel> listBanner = [temp];
@@ -41,13 +42,11 @@ class HomeViewState extends State<HomeView> {
   List<BannerModel> listBannerBerita = [];
   final CarouselController _controller = CarouselController();
 
-
-
-
   @override
   void initState() {
     super.initState();
     bannerService = BannerService();
+    spesialisasiService = SpesialisasiService();
     dokterFavoritService = DokterFavoritService();
     bannerService.getBanner().then((value) {
       setState(() {
@@ -63,18 +62,6 @@ class HomeViewState extends State<HomeView> {
       });
     });
     getFavorit();
-  }
-
-  getFavorit() async {
-    String idUser = "";
-    await SharedPreferenceHelper.getUser().then((value) => idUser = value![2]);
-    dokterFavoritService.getDokterfavorit(idUser)
-        .then((value){
-      value.forEach((element) {
-        listDokterFavorit.add(element.idDokter.toString());
-        SharedPreferenceHelper.addFavorite(listDokterFavorit);
-      });
-    });
   }
 
   @override
@@ -140,9 +127,9 @@ class HomeViewState extends State<HomeView> {
                               },
                               icon: Icon(Icons.favorite)
                             ),
-                        ],
-                      )
-                    ]
+                          ],
+                        )
+                      ]
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -152,58 +139,72 @@ class HomeViewState extends State<HomeView> {
                         image: AssetImage("assets/images/Background.png"),
                         alignment: Alignment.center,
                         fit: BoxFit.fill)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child:
-                      Column(
-                        children: <Widget>[
-                          SizedBox(
-                            height: 5,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          color: Colors.transparent,
+                          height: 260,
+                          child: buatCarousel(listBannerUtama, "")
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                color: Colors.transparent,
+                                height: 210,
+                                width: MediaQuery.of(context).size.width,
+                                child: tampilanMenuGeser(context)),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5),
+                        Center(
+                          child: ScrollIndicator(
+                            scrollController: scrollController,
+                            width: 20,
+                            height: 10,
+                            indicatorWidth: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.lightGreen,
+                              borderRadius: BorderRadius.all(Radius.circular(10)
+                              )
+                            ),
+                            indicatorDecoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              color: Constant.color,
+                            ),
                           ),
-                          Container(
+                        ),
+                        SizedBox(height: 20),
+                        Text("Promo dan Layanan", style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                        SizedBox(height: 10),
+                        Container(
+                            color: Colors.transparent,
+                            height: 200,
+                            child: promoLayanan(listBannerPromo)
+                        ),
+                        SizedBox(height: 20),
+                        Text("Berita Kesehatan Terkini", style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                        SizedBox(height: 10),
+                        Container(
                             color: Colors.transparent,
                             height: 260,
-                            child: _createCarousel(listBannerUtama)
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  color: Colors.transparent,
-                                  height: 210,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: _gridView(context)),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20),
-                          Text("Promo dan Layanan", style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                          SizedBox(height: 10),
-                          Container(
-                              color: Colors.transparent,
-                              height: 200,
-                              child: gridPromoLayanan(listBannerPromo)
-                          ),
-                          SizedBox(height: 20),
-                          Text("Berita Kesehatan Terkini", style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                          SizedBox(height: 10),
-                          Container(
-                              color: Colors.transparent,
-                              height: 260,
-                              child: _createCarousel(listBannerBerita)
-                          ),
-                          SizedBox(height: 20),
-                          Text("Hubungi dan Ikuti Kami", style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                          SizedBox(height: 10),
-                          _buttonView(),
-                        ],
-                      ),
+                            child: buatCarousel(listBannerBerita, "berita")
+                        ),
+                        SizedBox(height: 20),
+                        Text("Hubungi dan Ikuti Kami", style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18)),
+                        SizedBox(height: 10),
+                        menuMediaSosial(),
+                      ],
                     ),
                   ),
                 )
@@ -217,25 +218,23 @@ class HomeViewState extends State<HomeView> {
 
   /*------------ Carousel ------------*/
   
-  Widget _createCarousel(List<BannerModel> bannerList) {
+  Widget buatCarousel(List<BannerModel> bannerList, String keterangan) {
     return Column(
       children: [
         CarouselSlider(
           items: bannerList.map((item) {
-          // items: listBannerTest.map((item) {
             return Builder(
               builder: (BuildContext context) {
                 return Container(
                     width: MediaQuery.of(context).size.width,
                     margin: EdgeInsets.symmetric(horizontal: 5.0),
                     child: ClipRRect(
-                        borderRadius:  BorderRadius.circular(15.0),
+                        borderRadius: BorderRadius.circular(5.0),
                         child: InkWell(
                           onTap: (){
                             Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'Banner')));
                           },
                           child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
-                          // child: Image.asset(item, fit: BoxFit.fill),
                         )
                     )
                 );
@@ -258,7 +257,6 @@ class HomeViewState extends State<HomeView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: bannerList.asMap().entries.map((entry) {
-          //children: listBannerTest.asMap().entries.map((entry) {
             return GestureDetector(
               onTap: () => _controller.animateToPage(entry.key),
               child: Container(
@@ -278,13 +276,13 @@ class HomeViewState extends State<HomeView> {
 
   /*------------ Grid Menu ------------*/
 
-  Widget _gridView (BuildContext context) {
+  Widget tampilanMenuGeser (BuildContext context) {
     double cardHeight;
     double cardWidth = 50.w;
     if(MediaQuery.of(context).size.width < 410)
       cardHeight = 34.h;
     else
-      cardHeight = 35.h;
+      cardHeight = 36.h;
     List<String> teks = ["Jadwal Dokter", "Imunisasi", "Medical Checkup", "Klinik Online", "Periksa COVID", "Pemeriksaan Lab", "Fast Track"];
     final List<String> icons = [
       "assets/images/Jadwal_Dokter.png",
@@ -295,6 +293,7 @@ class HomeViewState extends State<HomeView> {
       "assets/images/Pemeriksaan_LAB.png",
       "assets/images/Fast_Track.png"];
     return GridView.count(
+        controller: scrollController,
         shrinkWrap: true,
         childAspectRatio: cardWidth / cardHeight,
         crossAxisCount: 2,
@@ -314,17 +313,15 @@ class HomeViewState extends State<HomeView> {
                       InkWell(
                         onTap: (){
                           if(index == 0)
-                            Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DoctorList()));
+                            Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DaftarDokter()));
                           if(index == 1)
-                            launchWhatsApp("Imunisasi");
+                            bukaWhatsApp("Imunisasi");
                           if(index == 2)
-                            launchWhatsApp("MCU");
+                            bukaWhatsApp("MCU");
                           if(index == 3)
-                            launchWhatsApp("Klinik");
+                            bukaWhatsApp("Klinik");
                           if(index == 4)
                             _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
-                          // if(index == 5)
-                          //   showMenu(context);
                         },
                         child: Container(
                           width: 80,
@@ -345,81 +342,9 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  // Future<void> showMenu(BuildContext context) async {
-  //   double cardWidth = MediaQuery.of(context).size.width / 2;
-  //   double cardHeight = MediaQuery.of(context).size.height / 3.5;
-  //   List<String> teks = ["Jadwal Dokter", "Imunisasi", "Medical Chekup", "Klinik Online", "Periksa COVID", "Pemeriksaan Lab", "Fast Track"];
-  //   final List<String> icons = [
-  //     "assets/images/Jadwal_Dokter.png",
-  //     "assets/images/DT_IMUNISASI.png",
-  //     "assets/images/MCU.png",
-  //     "assets/images/Klinik_Online.png",
-  //     "assets/images/Pemeriksaan_COVID.png",
-  //     "assets/images/Pemeriksaan_LAB.png",
-  //     "assets/images/Fast_Track.png",
-  //   ];
-  //   await showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return SimpleDialog(
-  //         shape: const RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.all(Radius.circular(20.0)),
-  //         ),
-  //         children: <Widget>[
-  //           Container(
-  //             width: 350,
-  //             height: 350,
-  //             child: GridView.count(
-  //               childAspectRatio: cardWidth / cardHeight,
-  //               crossAxisCount: 3,
-  //               scrollDirection: Axis.vertical,
-  //               mainAxisSpacing: 5,
-  //               crossAxisSpacing: 3,
-  //               children: List.generate(icons.length, (index) {
-  //                 return
-  //                   SizedBox(
-  //                     child: Column(
-  //                       children: [
-  //                         InkWell(
-  //                           onTap: (){
-  //                             if(index == 0)
-  //                               Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DoctorList()));
-  //                             if(index == 1)
-  //                               launchWhatsApp("Imunisasi");
-  //                             if(index == 2)
-  //                               launchWhatsApp("MCU");
-  //                             if(index == 3)
-  //                               launchWhatsApp("Klinik");
-  //                             if(index == 4)
-  //                               _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
-  //                           },
-  //                           child: Container(
-  //                             width: 80,
-  //                             child: index != 6 && index !=5 ? Image.asset(icons[index]) : ColorFiltered(
-  //                               colorFilter: ColorFilter.mode(
-  //                                 Colors.grey,
-  //                                 BlendMode.saturation,
-  //                               ),
-  //                               child: Image.asset(icons[index]),
-  //                             )
-  //                           )
-  //                         ),
-  //                         Center(child: Text(teks[index],textAlign: TextAlign.center,style: TextStyle(color: Colors.black, fontSize:14, fontWeight: FontWeight.bold),))
-  //                       ],
-  //                     )
-  //                   );
-  //               })
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
-
   /*------------ Menu Media Sosial------------*/
   
-  Widget _buttonView () {
+  Widget menuMediaSosial () {
     return Padding(
       padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
       child: Row(
@@ -460,7 +385,7 @@ class HomeViewState extends State<HomeView> {
             _launchURL("https://instagram.com/droen_solobaru/");
           }
           if(index == 2) {
-            launchWhatsApp("General");
+            bukaWhatsApp("General");
           }
           if(index == 3) {
             _launchURL("https://www.google.com/maps/place/RS+Dr.+OEN+SOLO+BARU/@-7.606801,110.7957897,17z/data=!3m1!4b1!4m5!3m4!1s0x2e7a3e2fabec7177:0xc073cd7a8c61f913!8m2!3d-7.606801!4d110.7979784");
@@ -470,18 +395,17 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget gridPromoLayanan(List<BannerModel> listBanner) {
+  Widget promoLayanan(List<BannerModel> listBanner) {
     return Container(
       width: double.infinity,
       color: Constant.color,
       child: GridView.count(
         shrinkWrap: true,
         primary: false,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(top: 20),
         scrollDirection: Axis.horizontal,
         crossAxisCount: 1,
           children: List.generate(listBanner.length, (index) {
-        // children: List.generate(listBannerPromoTest.length, (index) {
           return
             Center(
               child: Container(
@@ -494,17 +418,24 @@ class HomeViewState extends State<HomeView> {
                           onTap: (){
                             Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: listBanner[index], keterangan: 'Promo')));
                           },
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2
-                              )
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: Container(
+                              width: 160,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 4
+                                )
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(listBanner[index].url, fit: BoxFit.fill)
+                              ),
+                              // child: Image.asset(listBannerPromoTest[index]),
                             ),
-                            child: Image.network(listBanner[index].url, fit: BoxFit.contain),
-                            // child: Image.asset(listBannerPromoTest[index]),
                           ),
                         ),
                       ],
@@ -517,9 +448,23 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
+  /*------------ Ambil Data Dokter Favorit------------*/
+
+  getFavorit() async {
+    String idUser = "";
+    await SharedPreferenceHelper.getUser().then((value) => idUser = value![2]);
+    dokterFavoritService.getDokterfavorit(idUser)
+        .then((value){
+      value.forEach((element) {
+        listDokterFavorit.add(element.idDokter.toString());
+        SharedPreferenceHelper.addFavorite(listDokterFavorit);
+      });
+    });
+  }
+
 }
 
-launchWhatsApp(String kategori) async {
+bukaWhatsApp(String kategori) async {
   String text="";
   if(kategori == "Klinik")
     text = "Halo, Saya Ingin Mendaftar Untuk Klinik Online";
