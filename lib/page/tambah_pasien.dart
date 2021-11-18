@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
-import 'package:sobatku/model/pasien.dart';
+import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/service/pasien_service.dart';
-
-import '../main.dart';
+import 'halaman_utama.dart';
 
 class TambahPasien extends StatefulWidget {
   @override
@@ -136,39 +134,19 @@ class TambahPasienState extends State<TambahPasien> {
                                 child: ElevatedButton(
                                   onPressed: (){
                                     if (!_formKey.currentState!.validate()) {
-                                      showToast('Harap Isi Semua Data',
-                                        context: context,
-                                        textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                        backgroundColor: Colors.red,
-                                        animation: StyledToastAnimation.scale,
-                                        reverseAnimation: StyledToastAnimation.fade,
-                                        position: StyledToastPosition.center,
-                                        animDuration: Duration(seconds: 1),
-                                        duration: Duration(seconds: 4),
-                                        curve: Curves.elasticOut,
-                                        reverseCurve: Curves.linear,
-                                      );
+                                      ToastNotification.showNotification('Harap Isi Semua Data', context, Colors.red);
                                     } else {
                                       pasienService.searchPasien(noRmField.text, namaField.text).then(
                                         (value) {
                                           if(value == false) {
-                                            showToast('Pasien Tidak Ditemukan',
-                                              context: context,
-                                              textStyle: TextStyle(fontSize: 16.0, color: Colors.white),
-                                              backgroundColor: Colors.red,
-                                              animation: StyledToastAnimation.scale,
-                                              reverseAnimation: StyledToastAnimation.fade,
-                                              position: StyledToastPosition.center,
-                                              animDuration: Duration(seconds: 1),
-                                              duration: Duration(seconds: 4),
-                                              curve: Curves.elasticOut,
-                                              reverseCurve: Curves.linear,
-                                            );
+                                            ToastNotification.showNotification('Pasien Tidak Ditemukan', context, Colors.red);
                                           }
                                           else if(value == true){
-                                            pasienService.createPairing(noRmField.text, userId).then((value) => print(value));
-                                            Navigator.of(context).pushReplacement(
-                                                new MaterialPageRoute(builder: (context) => new MyApp()));
+                                            pasienService.createPairing(noRmField.text, userId).then((value) => ToastNotification.showNotification(value + ", Harap Cek Nomor BPJS Pasein", context, Constant.color));
+                                            Future.delayed(Duration(seconds: 1)).then((value) =>
+                                              Navigator.of(context).pushReplacement(
+                                                  new MaterialPageRoute(builder: (context) => new MyApp()))
+                                            );
                                           }
                                         }
                                       );
