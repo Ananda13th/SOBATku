@@ -64,6 +64,18 @@ class PasienService {
     }
   }
 
+  Future<bool> updateNoBpjs(String noBpjs, String noRm) async {
+    final response = await http.put(
+        Uri.parse(baseUrl + "pasien/$noBpjs/$noRm"),
+        headers: URL.createHeader()
+    );
+    if(response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Future<List<Pasien>> getPairing(String idUser) async {
     final response = await http.get(
         Uri.parse(baseUrl + "pasien/$idUser"),
