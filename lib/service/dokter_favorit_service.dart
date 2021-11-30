@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:sobatku/model/dokter_favorit.dart';
 
 class DokterFavoritService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<List<DokterFavorit>> getDokterfavorit(String idUser) async {
     final response = await http.get(

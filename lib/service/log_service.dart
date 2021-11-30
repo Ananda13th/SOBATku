@@ -5,7 +5,7 @@ import 'package:sobatku/helper/url_helper.dart';
 import 'package:sobatku/model/log.dart';
 
 class LogService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<String> createLog(Log newLog) async {
     final response = await http.post(

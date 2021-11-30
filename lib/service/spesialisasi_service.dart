@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:sobatku/model/spesialisasi.dart';
 
 class SpesialisasiService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<List<Spesialisasi>> getSpesialisasi() async {
     final response = await http.get(

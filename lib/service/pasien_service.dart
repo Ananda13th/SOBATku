@@ -6,7 +6,7 @@ import 'package:sobatku/model/pairing.dart';
 import 'package:sobatku/model/pasien.dart';
 
 class PasienService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<String> createPasien(Pasien newPasien) async {
     final response = await http.post(
@@ -22,7 +22,7 @@ class PasienService {
     }
   }
 
-  Future<bool> searchPasien(String nomorRm, String namaBelakang) async {
+  Future searchPasien(String nomorRm, String namaBelakang) async {
     final response = await http.get(
       Uri.parse(baseUrl + "pasien/search/$nomorRm/$namaBelakang"),
       headers: URL.createHeader()
@@ -30,10 +30,11 @@ class PasienService {
     if(response.statusCode == 200) {
       var obj = json.decode(response.body);
       if(obj["error_code"] == 200)
-        return true;
-      return false;
+        return obj['data'][0]['nomor_bpjs'];
+      else
+        return false;
     } else {
-      return false;
+        return false;
     }
   }
 
@@ -48,6 +49,8 @@ class PasienService {
       var message = json.decode(response.body);
       return message['message'];
     } else {
+      print(response.body);
+      print(response.statusCode);
       throw Exception("Failed");
     }
   }

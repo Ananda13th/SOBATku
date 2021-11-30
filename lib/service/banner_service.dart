@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:sobatku/model/banner.dart';
 
 class BannerService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<List<BannerModel>> getBanner() async {
     final response = await http.get(

@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:sobatku/model/notifikasi.dart';
 
 class NotifikasiService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<List<Notifikasi>> getNotifList(String idUser) async {
     final response = await http.get(

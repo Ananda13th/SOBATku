@@ -4,7 +4,7 @@ import 'package:sobatku/helper/url_helper.dart';
 import 'package:http/http.dart' as http;
 
 class BpjsService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<String> cekAtivasi(String noBpjs) async {
     final response = await http.get(

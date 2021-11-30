@@ -6,7 +6,7 @@ import 'package:sobatku/model/transaksi_req.dart';
 import 'package:sobatku/model/transaksi_resp.dart';
 
 class TransaksiService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<List<TransaksiResp>> getTransaksi(String noRm) async {
     String _finalUrl = baseUrl + "transaksi/$noRm";

@@ -4,7 +4,7 @@ import 'package:sobatku/helper/url_helper.dart';
 import 'package:http/http.dart' as http;
 
 class CutiService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<bool> cekCuti(String kodeJadwal) async {
     final response = await http.get(

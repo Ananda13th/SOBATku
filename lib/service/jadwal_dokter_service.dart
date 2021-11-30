@@ -4,7 +4,7 @@ import 'package:sobatku/helper/url_helper.dart';
 import 'package:sobatku/model/jadwal_dokter.dart';
 
 class JadwalService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<List<JadwalDokter>> getJadwalDokter(String kodeSpesialisasi, String hari) async {
     final response = await http.get(
