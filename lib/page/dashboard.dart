@@ -33,7 +33,7 @@ class HomeViewState extends State<HomeView> {
   late DokterFavoritService dokterFavoritService;
   late SpesialisasiService spesialisasiService;
   late JadwalService jadwalService;
-  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", urlDetailBanner:"", urlSumberBerita:"", deskripsi: "", keterangan: "");
+  BannerModel temp = new BannerModel(url: "https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif", judul:"", urlDetailBanner:"", urlSumberBerita:"", deskripsi: "", keterangan: "");
   late List<String> listBannerPromoTest = ["assets/images/promo1.jpeg","assets/images/promo2.jpeg", "assets/images/promo3.jpeg", "assets/images/promo4.jpeg", "assets/images/promo5.jpeg", "assets/images/promo6.jpeg"];
   late List<String> listBannerTest = ["assets/images/Banner.png"];
   late List<BannerModel> listBanner = [temp];
@@ -191,7 +191,7 @@ class HomeViewState extends State<HomeView> {
                             child: promoLayanan(listBannerPromo)
                         ),
                         SizedBox(height: 20),
-                        Text("Berita Kesehatan Terkini", style: TextStyle(
+                        Text("Berita Kesehatan", style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 18)),
                         SizedBox(height: 10),
                         Container(
@@ -203,7 +203,11 @@ class HomeViewState extends State<HomeView> {
                         Text("Hubungi dan Ikuti Kami", style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 18)),
                         SizedBox(height: 10),
-                        menuMediaSosial(),
+                        Row(
+                          children: [
+                            Expanded(child:  menuMediaSosial()),
+                          ],
+                        )
                       ],
                     ),
                   ),
@@ -217,7 +221,7 @@ class HomeViewState extends State<HomeView> {
   }
 
   /*------------ Carousel ------------*/
-  
+
   Widget buatCarousel(List<BannerModel> bannerList, String keterangan) {
     return Column(
       children: [
@@ -274,7 +278,7 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  /*------------ Grid Menu ------------*/
+  /// ------------ Grid Menu Geser------------ ///
 
   Widget tampilanMenuGeser (BuildContext context) {
     double cardHeight;
@@ -342,8 +346,8 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  /*------------ Menu Media Sosial------------*/
-  
+  /// ------------ Menu Media Sosial------------ ///
+
   Widget menuMediaSosial () {
     return Padding(
       padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
@@ -363,7 +367,7 @@ class HomeViewState extends State<HomeView> {
     if(MediaQuery.of(context).size.width < 410)
       padding = MediaQuery.of(context).size.width*3.5/100;
     else
-      padding = MediaQuery.of(context).size.width*3.8/100;
+      padding = MediaQuery.of(context).size.width*4.1/100;
     return Padding(
       padding: EdgeInsets.all(padding),
       child: InkResponse(
@@ -448,7 +452,7 @@ class HomeViewState extends State<HomeView> {
     );
   }
 
-  /*------------ Ambil Data Dokter Favorit------------*/
+  /// ------------ Ambil Data Dokter Favorit------------ ///
 
   getFavorit() async {
     String idUser = "";
