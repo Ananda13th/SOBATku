@@ -47,7 +47,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
   @override
   void initState() {
     super.initState();
-    /* INISIALISASI SERVICE */
+    /// INISIALISASI SERVICE ///
     doctorService = DokterService();
     pasienService = PasienService();
     jadwalService = JadwalService();
@@ -62,7 +62,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
       });
     });
 
-    /* CEK BILA USER SUDAH PERNAH LOGIN */
+    /// CEK BILA USER SUDAH PERNAH LOGIN ///
     checkUserExist().then((value) {
       if (value) {
         getFavorit();
@@ -117,27 +117,32 @@ class _DaftarDokterState extends State<DaftarDokter> {
     );
   }
 
-  /*------------ Fungsi Tampil List Dokter ------------*/
+  /// ------------ Fungsi Tampil List Dokter ------------ ///
 
   Widget _buildListDokter(List<Dokter> doctors) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Flexible(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              textAlignVertical: TextAlignVertical.center,
-              controller: _searchController,
-              decoration: InputDecoration(
+          child: Container(
+            color: Constant.color,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                textAlignVertical: TextAlignVertical.center,
+                controller: _searchController,
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  filled: true,
                   contentPadding: EdgeInsets.all(0),
-                isDense: true,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-                hintStyle: TextStyle(fontWeight: FontWeight.bold),
-                hintText: 'Cari Dokter...'
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.search),
+                  hintStyle: TextStyle(fontWeight: FontWeight.bold),
+                  hintText: 'Cari Dokter...'
+                ),
+                onChanged: onCariDokter,
               ),
-              onChanged: onCariDokter,
             ),
           )
         ),
@@ -169,7 +174,9 @@ class _DaftarDokterState extends State<DaftarDokter> {
                         child: SizedBox(
                           width: 80,
                           height: 80,
-                          child: Image.asset("assets/images/profileAvatar.png"),
+                          child: dokter.foto != "" ? CircleAvatar(
+                            backgroundImage: NetworkImage(dokter.foto),
+                          ) : Image.asset("assets/images/profileAvatar.png"),
                         ),
                       ),
                       Flexible(
@@ -202,7 +209,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
                                 title: Text(dokter.namaDokter, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                 subtitle: Text(dokter.spesialisasi, style: TextStyle(fontSize: 16)),
                             ),
-                              onTap: (){_buildDetailDokterDialog(context, jadwalService, dokter);},
+                            onTap: (){_buildDetailDokterDialog(context, jadwalService, dokter);},
                           ),
                         )
                       )
@@ -217,7 +224,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
     );
   }
 
-  /*------------ Fungsi Search Dokter ------------*/
+  /// ------------ Fungsi Search Dokter ------------ ///
 
   onCariDokter(String value) {
     setState(() {
@@ -225,7 +232,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
     });
   }
 
-  /*------------ Menampilkan Detail Dokter ------------*/
+  /// ------------ Menampilkan Detail Dokter ------------ ///
 
   Future<void> _buildDetailDokterDialog(BuildContext context, JadwalService scheduleService, Dokter dokter) async {
     await showDialog(
@@ -233,90 +240,91 @@ class _DaftarDokterState extends State<DaftarDokter> {
       builder: (context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-          return  AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            content: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Container(
-                    height: 150,
-                    width: 150,
-                    child: Image.asset("assets/images/profileAvatar.png"),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        color: Constant.color,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 5, right: 5),
-                            child: Text(
-                                dokter.namaDokter,
-                                style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 16),
-                                textAlign: TextAlign.center,
-                            ),
-                          )
-                        )
-                      ),
+            return  AlertDialog(
+              contentPadding: EdgeInsets.zero,
+              content: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      height: 150,
+                      width: 150,
+                      child: dokter.foto != "" ? CircleAvatar(
+                        backgroundImage: NetworkImage(dokter.foto),
+                      ) : Image.asset("assets/images/profileAvatar.png"),
                     ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Text(dokter.spesialisasi, style:TextStyle(fontSize: 14)),
-                SizedBox(height: 10),
-                Divider(
-                  color: Colors.black,
-                  thickness: 2,
-                ),
-                Text("Jadwal Praktek", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Divider(
-                  color: Colors.black,
-                  thickness: 2,
-                ),
-                Flexible(
-                  child: FutureBuilder<List<JadwalDokter>>(
-                    future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if(snapshot.hasError) {
-                        return Container(
-                          width: 300,
-                          height: 290,
-                          child: Center(child: Text("Terjadi Kesalahan")),
-                        );
-                      }
-                      if(snapshot.hasData){
-                        List<JadwalDokter> listJadwalDokter = snapshot.data;
-                        if(listJadwalDokter.isEmpty)
-                          return Flexible(
-                            child: Container(
-                              child: Center(child: Text("Belum Ada Jadwal", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-                            ),
-                          );
-                        else
-                          return _buildListJadwal(listJadwalDokter, dokter);
-                      } else {
-                        return Container(
-                          width: 300,
-                          height: 290,
-                          child: Flexible(child: Center(child: Image.asset("assets/images/load-loading.gif", fit: BoxFit.scaleDown))),
-                        );
-                      }
-                    }
                   ),
-                ),
-              ],
-            ),
-          );}
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 40,
+                          color: Constant.color,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 5, right: 5),
+                              child: Text(
+                                  dokter.namaDokter,
+                                  style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 16),
+                                  textAlign: TextAlign.center,
+                              ),
+                            )
+                          )
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(dokter.spesialisasi, style:TextStyle(fontSize: 14)),
+                  SizedBox(height: 10),
+                  Divider(
+                    color: Colors.black,
+                    thickness: 2,
+                  ),
+                  Text("Jadwal Praktek", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Divider(
+                    color: Colors.black,
+                    thickness: 2,
+                  ),
+                  Flexible(
+                    child: FutureBuilder<List<JadwalDokter>>(
+                      future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        if(snapshot.hasError) {
+                          return Container(
+                            width: 300,
+                            height: 290,
+                            child: Center(child: Text("Terjadi Kesalahan")),
+                          );
+                        }
+                        if(snapshot.hasData){
+                          List<JadwalDokter> listJadwalDokter = snapshot.data;
+                          if(listJadwalDokter.isEmpty)
+                            return Container(
+                              child: Center(child: Text("Belum Ada Jadwal", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+                            );
+                          else
+                            return _buildListJadwal(listJadwalDokter, dokter);
+                        } else {
+                          return Container(
+                            width: 300,
+                            height: 290,
+                            child: Center(child: Image.asset("assets/images/load-loading.gif", fit: BoxFit.scaleDown)),
+                          );
+                        }
+                      }
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
         );
       },
     );
   }
 
-  /*------------ Menampilkan Jadwal Dokter ------------*/
+  /// ------------ Menampilkan Jadwal Dokter ------------ ///
 
   Widget _buildListJadwal(List<JadwalDokter> jadwalDokter, Dokter dokter) {
 
@@ -353,23 +361,21 @@ class _DaftarDokterState extends State<DaftarDokter> {
                   Row(
                     children: <Widget>[
                       Flexible(
-                        child: SizedBox(
-                          child: ListTile(
-                            title: Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    DayConverter.convertToDay(jadwal.hari),
-                                    style: TextStyle(fontWeight: FontWeight.bold)
-                                  ),
-                                  Text(
-                                    jadwal.hari < now.weekday ? listTanggalFormatTampil[jadwal.hari + 7] : listTanggalFormatTampil[jadwal.hari]
-                                  )
-                                ],
-                              )
-                            ),
+                        child: ListTile(
+                          title: Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  DayConverter.convertToDay(jadwal.hari),
+                                  style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                                Text(
+                                  jadwal.hari < now.weekday ? listTanggalFormatTampil[jadwal.hari + 7] : listTanggalFormatTampil[jadwal.hari]
+                                )
+                              ],
+                            )
                           ),
-                        )
+                        ),
                       )
                     ],
                   ),
@@ -421,7 +427,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
     }
   }
 
-  /*------------ Fungsi Shared Preference Ambil Data User ------------*/
+  ///------------ Fungsi Shared Preference Ambil Data User ------------///
 
   Future<bool> checkUserExist() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -438,7 +444,7 @@ class _DaftarDokterState extends State<DaftarDokter> {
     return _user![2];
   }
 
-  /*------------ Ambil Daftar Dokter Favorit ------------*/
+  ///------------ Ambil Daftar Dokter Favorit ------------///
 
   getFavorit() async {
     await SharedPreferenceHelper.getUser().then((value) {
@@ -454,6 +460,10 @@ class _DaftarDokterState extends State<DaftarDokter> {
       });
     });
   }
+}
 
+extension StringCasingExtension on String {
+  String toCapitalized() => this.length > 0 ?'${this[0].toUpperCase()}${this.substring(1)}':'';
+  String get toTitleCase => this.toLowerCase().replaceAll(RegExp(' +'), ' ').split(" ").map((str) => str.toCapitalized()).join(" ");
 }
 

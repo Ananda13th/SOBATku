@@ -124,7 +124,7 @@ class _FavoriteListState extends State<FavoriteList> {
 
   /*------------ Fungsi Tampil List Dokter ------------*/
 
-  Widget _buildListDokter(List<Dokter> doctors) {
+  Widget _buildListDokter(List<Dokter> daftarDokter) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -136,9 +136,9 @@ class _FavoriteListState extends State<FavoriteList> {
             color: Colors.transparent,
             child: ListView.separated(
               separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.transparent),
-              itemCount: doctors.length,
+              itemCount: daftarDokter.length,
               itemBuilder: (context, index) {
-                Dokter doctor = doctors[index];
+                Dokter dokter = daftarDokter[index];
                 return Padding(
                   padding: const EdgeInsets.only(left: 8, right: 8),
                   child: Container(
@@ -155,17 +155,19 @@ class _FavoriteListState extends State<FavoriteList> {
                           child: SizedBox(
                             width: 100,
                             height: 100,
-                            child: Image.asset("assets/images/profileAvatar.png"),
+                            child: dokter.foto != "" ? CircleAvatar(
+                              backgroundImage: NetworkImage(dokter.foto),
+                            ) : Image.asset("assets/images/profileAvatar.png"),
                           ),
                         ),
                         Flexible(
                             child: SizedBox(
                               child: InkWell(
                                 child: ListTile(
-                                  title: Text(doctor.namaDokter, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.left),
-                                  subtitle: Text(doctor.spesialisasi, style: TextStyle(fontSize: 16)),
+                                  title: Text(dokter.namaDokter, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.left),
+                                  subtitle: Text(dokter.spesialisasi, style: TextStyle(fontSize: 16)),
                                 ),
-                                onTap: (){_buildDetailDokterDialog(context, jadwalService, doctor);},
+                                onTap: (){_buildDetailDokterDialog(context, jadwalService, dokter);},
                               ),
                             )
                         )
@@ -206,7 +208,7 @@ class _FavoriteListState extends State<FavoriteList> {
                                   child: Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Padding(
-                                      padding: const EdgeInsets.only(bottom: 20),
+                                      padding: const EdgeInsets.only(bottom: 5),
                                       child: Padding(
                                         padding: const EdgeInsets.only(left: 5, right: 5),
                                         child: Text(
@@ -272,7 +274,9 @@ class _FavoriteListState extends State<FavoriteList> {
               child: Container(
                 height: 150,
                 width: 150,
-                child: Image.asset("assets/images/profileAvatar.png"),
+                child: dokter.foto != "" ? CircleAvatar(
+                  backgroundImage: NetworkImage(dokter.foto),
+                ) : Image.asset("assets/images/profileAvatar.png"),
               ),
             ),
           ]
