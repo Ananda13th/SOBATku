@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:sobatku/helper/url_helper.dart';
+import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/model/user.dart';
 
 class UserService {
-  var baseUrl = URL.devAddress;
+  var baseUrl = URL.urlAddress;
 
   Future<User?> getUser(String noHp, String password) async {
       String _finalUrl = baseUrl + "user/$noHp/$password";
@@ -97,6 +98,39 @@ class UserService {
     if(response.statusCode == 200) {
       final result = json.decode(response.body);
       return result['message'];
+    } else {
+      return "Terjadi Kesalahan";
+    }
+  }
+
+  Future<String> saveToFirebase(String id, Pasien pasien, String fcm) async {
+    Map<String, String> body = <String, String>{
+      'idUser'      : id,
+      'namaPasien'  : pasien.namaPasien,
+      'noRm'        : pasien.nomorRm,
+      'fcmToken'    : fcm,
+    };
+
+    final response = await http.post(
+        Uri.parse(baseUrl + "user/add/firebase"),
+        headers: URL.createHeader(),
+        body: json.encode(body)
+    );
+
+    if(response.statusCode == 200) {
+      return "Berhasil";
+    } else {
+      return "Terjadi Kesalahan";
+    }
+  }
+
+  Future<String> deleteFromFirebase(String id, String namaPasien) async {
+    final response = await http.delete(
+        Uri.parse(baseUrl + "user/delete/firebase/$id/$namaPasien"),
+        headers: URL.createHeader(),
+    );
+    if(response.statusCode == 200) {
+      return "Berhasil";
     } else {
       return "Terjadi Kesalahan";
     }
