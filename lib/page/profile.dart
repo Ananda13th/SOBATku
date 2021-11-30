@@ -89,8 +89,8 @@ class _ProfileState extends State<Profile> {
                             Flexible(
                               child: Container(
                                 child: ListTile(
-                                  title: Text(user[1]),
-                                  subtitle: Text(user[0]),
+                                  title: Text(user[1], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  subtitle: Text(user[0], style: TextStyle(fontSize: 16)),
                                 ),
                               )
                             ),
@@ -240,93 +240,117 @@ class _ProfileState extends State<Profile> {
           Pasien pasien = daftarPasien[index];
           return Row(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  child: pasien.jenisKelamin.toLowerCase() == "l" ? Image.asset("assets/icons/avatar_l.png", fit: BoxFit.fill) : Image.asset("assets/icons/avatar_p.png", fit: BoxFit.fill),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(8.0),
+              //   child: Container(
+              //     width: 50,
+              //     height: 50,
+              //     child: pasien.jenisKelamin.toLowerCase() == "l" ? Image.asset("assets/icons/avatar_l.png", fit: BoxFit.fill) : Image.asset("assets/icons/avatar_p.png", fit: BoxFit.fill),
+              //   ),
+              // ),
               Flexible(
                 child: Container(
-                  child: ListTile(
-                    title: Text(pasien.namaPasien, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      children: [
-                        SizedBox(height: 5),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Nomor RM : " + pasien.nomorRm, style: TextStyle(fontSize: 14))
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    color: Constant.color,
+                    elevation: 10,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: ListTile(
+                            leading: pasien.jenisKelamin.toLowerCase() == "l" ? Image.asset("assets/icons/avatar_l.png", fit: BoxFit.fill) : Image.asset("assets/icons/avatar_p.png", fit: BoxFit.contain),
+                            title: Text(pasien.namaPasien, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            subtitle: Column(
+                              children: [
+                                SizedBox(height: 5),
+                                Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text("Nomor RM : " + pasien.nomorRm, style: TextStyle(color: Colors.white, fontSize: 14))
+                                ),
+                                SizedBox(height: 5),
+                                Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text("Nomor BPJS : " + pasien.nomorBpjs, style: TextStyle(color: Colors.white, fontSize: 14))
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 5),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text("Nomor BPJS : " + pasien.nomorBpjs, style: TextStyle(fontSize: 14))
+                        ButtonBarTheme(
+                          data: ButtonBarThemeData(
+                            alignment: MainAxisAlignment.spaceAround
+                          ),
+                          child: ButtonBar(
+                            children: <Widget>[
+                              TextButton.icon(
+                                icon: Icon(Icons.edit, color: Colors.white),
+                                label: const Text('Ubah Data', style: TextStyle(color: Colors.white, fontSize: 18)),
+                                onPressed: () {
+                                  noBpjsController.text = pasien.nomorBpjs;
+                                  Alert(
+                                      context: context,
+                                      title: "Ubah Nomor BPJS Pasien",
+                                      content: Column(
+                                        children: <Widget>[
+                                          TextField(
+                                            keyboardType: TextInputType.number,
+                                            controller: noBpjsController..text,
+                                            decoration: InputDecoration(
+                                              icon: Icon(Icons.account_circle),
+                                              labelText: "Nomor BPJS",
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      buttons: [
+                                        DialogButton(
+                                          onPressed: () {
+                                            bpjsService.cekAtivasi(noBpjsController.text).then((value) {
+                                              if (value == "aktif") {
+                                                pasienService.updateNoBpjs(noBpjsController.text, pasien.nomorRm).then((value) {
+                                                  if (value) {
+                                                    ToastNotification.showNotification("Berhasil Ubah Nomor BPJS", context, Constant.color);
+                                                    Future.delayed(Duration(seconds: 3)).then((value) => Navigator.pop(context));
+                                                    setState(() {
+                                                      dataFuturePasien = getPasien();
+                                                    });
+                                                  }
+                                                  else
+                                                    ToastNotification.showNotification("Gagal Ubah Nomor BPJS", context, Colors.red);
+                                                });
+                                              }
+                                              else
+                                                ToastNotification.showNotification(value.toString(), context, Colors.red);
+                                            });
+                                          },
+                                          child: Text(
+                                            "Simpan",
+                                            style: TextStyle(color: Colors.white, fontSize: 20),
+                                          ),
+                                        )
+                                      ]).show();
+                                }
+                              ),
+                              TextButton.icon(
+                                icon: Icon(Icons.delete, color: Colors.white),
+                                label: const Text('Hapus', style: TextStyle(color: Colors.white, fontSize: 18)),
+                                onPressed: () {
+                                  userService.deleteFromFirebase(user[2], pasien.namaPasien);
+                                  pasienService.deletePairing(user[2], pasien.nomorRm).then((value) {
+                                    print(value);
+                                    rebuild(setState);
+                                  });
+                                }
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            noBpjsController.text = pasien.nomorBpjs;
-                            Alert(
-                              context: context,
-                              title: "Ubah Nomor BPJS Pasien",
-                              content: Column(
-                                children: <Widget>[
-                                  TextField(
-                                    controller: noBpjsController..text,
-                                    decoration: InputDecoration(
-                                      icon: Icon(Icons.account_circle),
-                                      labelText: "Nomor BPJS",
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              buttons: [
-                                DialogButton(
-                                  onPressed: () {
-                                    bpjsService.cekAtivasi(noBpjsController.text).then((value) {
-                                      if (value == "aktif") {
-                                        pasienService.updateNoBpjs(noBpjsController.text, pasien.nomorRm).then((value) {
-                                          if (value) {
-                                            ToastNotification.showNotification("Berhasil Ubah Nomor BPJS", context, Constant.color);
-                                            Future.delayed(Duration(seconds: 3)).then((value) => Navigator.pop(context));
-                                            setState(() {
-                                              dataFuturePasien = getPasien();
-                                            });
-                                          }
-                                          else
-                                            ToastNotification.showNotification("Gagal Ubah Nomor BPJS", context, Colors.red);
-                                        });
-                                      }
-                                      else
-                                        ToastNotification.showNotification(value.toString(), context, Colors.red);
-                                    });
-                                  },
-                                  child: Text(
-                                    "Simpan",
-                                    style: TextStyle(color: Colors.white, fontSize: 20),
-                                  ),
-                                )
-                              ]).show();
-                          }
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            pasienService.deletePairing(user[2], pasien.nomorRm).then((value) {
-                              print(value);
-                              rebuild(setState);
-                            });
-                          }
-                        )
-                      ],
-                    )
                   ),
                 )
               )
@@ -335,6 +359,112 @@ class _ProfileState extends State<Profile> {
         }
     );
   }
+
+  // Widget _buildListPasien(List<Pasien> daftarPasien) {
+  //   return ListView.separated(
+  //       separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
+  //       itemCount: daftarPasien.length,
+  //       itemBuilder: (context, index) {
+  //         Pasien pasien = daftarPasien[index];
+  //         return Row(
+  //           children: <Widget>[
+  //             Padding(
+  //               padding: const EdgeInsets.all(8.0),
+  //               child: Container(
+  //                 width: 50,
+  //                 height: 50,
+  //                 child: pasien.jenisKelamin.toLowerCase() == "l" ? Image.asset("assets/icons/avatar_l.png", fit: BoxFit.fill) : Image.asset("assets/icons/avatar_p.png", fit: BoxFit.fill),
+  //               ),
+  //             ),
+  //             Flexible(
+  //               child: Container(
+  //                 child: ListTile(
+  //                   title: Text(pasien.namaPasien, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+  //                   subtitle: Column(
+  //                     children: [
+  //                       SizedBox(height: 5),
+  //                       Align(
+  //                         alignment: Alignment.centerLeft,
+  //                         child: Text("Nomor RM : " + pasien.nomorRm, style: TextStyle(fontSize: 14))
+  //                       ),
+  //                       SizedBox(height: 5),
+  //                       Align(
+  //                         alignment: Alignment.centerLeft,
+  //                         child: Text("Nomor BPJS : " + pasien.nomorBpjs, style: TextStyle(fontSize: 14))
+  //                       ),
+  //                     ],
+  //                   ),
+  //                   trailing: Row(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: <Widget>[
+  //                       IconButton(
+  //                         icon: Icon(Icons.edit),
+  //                         onPressed: () {
+  //                           noBpjsController.text = pasien.nomorBpjs;
+  //                           Alert(
+  //                             context: context,
+  //                             title: "Ubah Nomor BPJS Pasien",
+  //                             content: Column(
+  //                               children: <Widget>[
+  //                                 TextField(
+  //                                   keyboardType: TextInputType.number,
+  //                                   controller: noBpjsController..text,
+  //                                   decoration: InputDecoration(
+  //                                     icon: Icon(Icons.account_circle),
+  //                                     labelText: "Nomor BPJS",
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                             buttons: [
+  //                               DialogButton(
+  //                                 onPressed: () {
+  //                                   bpjsService.cekAtivasi(noBpjsController.text).then((value) {
+  //                                     if (value == "aktif") {
+  //                                       pasienService.updateNoBpjs(noBpjsController.text, pasien.nomorRm).then((value) {
+  //                                         if (value) {
+  //                                           ToastNotification.showNotification("Berhasil Ubah Nomor BPJS", context, Constant.color);
+  //                                           Future.delayed(Duration(seconds: 3)).then((value) => Navigator.pop(context));
+  //                                           setState(() {
+  //                                             dataFuturePasien = getPasien();
+  //                                           });
+  //                                         }
+  //                                         else
+  //                                           ToastNotification.showNotification("Gagal Ubah Nomor BPJS", context, Colors.red);
+  //                                       });
+  //                                     }
+  //                                     else
+  //                                       ToastNotification.showNotification(value.toString(), context, Colors.red);
+  //                                   });
+  //                                 },
+  //                                 child: Text(
+  //                                   "Simpan",
+  //                                   style: TextStyle(color: Colors.white, fontSize: 20),
+  //                                 ),
+  //                               )
+  //                             ]).show();
+  //                         }
+  //                       ),
+  //                       IconButton(
+  //                         icon: Icon(Icons.delete),
+  //                         onPressed: () {
+  //                           userService.deleteFromFirebase(user[2], pasien.namaPasien);
+  //                           pasienService.deletePairing(user[2], pasien.nomorRm).then((value) {
+  //                             print(value);
+  //                             rebuild(setState);
+  //                           });
+  //                         }
+  //                       )
+  //                     ],
+  //                   )
+  //                 ),
+  //               )
+  //             )
+  //           ],
+  //         );
+  //       }
+  //   );
+  // }
 
   Future<void> updateUSer(String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
