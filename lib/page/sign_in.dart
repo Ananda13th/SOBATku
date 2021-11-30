@@ -210,7 +210,7 @@ class SignInState extends State<SignIn> {
                                     userService.getUser(noHp, passwordField.text).then((value) {
                                       if (value != null) {
                                         List<String> data = [
-                                          value.email,
+                                          value.nomorHp,
                                           value.namaUser,
                                           value.idUser.toString()
                                         ];
