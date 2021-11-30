@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sobatku/main.dart';
+import 'package:sobatku/page/halaman_utama.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
