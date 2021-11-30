@@ -20,6 +20,7 @@ class DetailBanner extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Constant.color,
+            title: Text(bannerModel.judul),
           ),
           body: SingleChildScrollView(
             child: Column(
@@ -55,10 +56,10 @@ class DetailBanner extends StatelessWidget {
                             Text(bannerModel.deskripsi, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,), textAlign: TextAlign.justify),
                             TextButton(
                               onPressed: (){
-                                if(bannerModel.urlSumberBerita != null)
+                                if(bannerModel.urlSumberBerita != "")
                                   _launchURL(bannerModel.urlSumberBerita.toString());
                               },
-                              child: bannerModel.urlSumberBerita != null ? Text("Lihat Selengkapnya", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)) : Text(""))
+                              child: bannerModel.urlSumberBerita != "" ? Text("Lihat Selengkapnya", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)) : Text(""))
                           ],
                         ),
                       )
