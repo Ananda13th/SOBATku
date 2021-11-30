@@ -10,19 +10,18 @@ import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/model/jadwal_dokter.dart';
 import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/model/spesialisasi.dart';
+import 'package:sobatku/page/dummy_card.dart';
 import 'package:sobatku/page/profile.dart';
 import 'package:sobatku/page/sign_in.dart';
 import 'package:sobatku/service/jadwal_dokter_service.dart';
 import 'package:sobatku/service/pasien_service.dart';
 import 'package:sobatku/service/spesialisasi_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_core/firebase_core.dart';
-
-
+import 'package:sobatku/service/user_service.dart';
 import 'aktivitas.dart';
 import 'dashboard.dart';
 import 'jadwal_dokter.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class MyApp extends StatefulWidget {
   @override
@@ -38,15 +37,16 @@ class _HomeState extends State<MyApp> {
     androidId: 'com.droensoba.sobatku',
   );
 
-  //DropDown Value
+  /// DropDown Value
   List<DropdownMenuItem<String>> itemList = [];
   String dropdownvalue = "-PILIH SPESIALISASI-";
-  //Kalender Value
+  /// Kalender Value
   final txtController = TextEditingController();
   var now = DateTime.now();
   late DateTime datePicked;
   late String dayInNumber, datePickedFormatted;
-  //Service
+  /// Service
+  late UserService userService;
   late PasienService pasienService;
   late SpesialisasiService spesialisasiService;
   late JadwalService jadwalService;
@@ -58,7 +58,7 @@ class _HomeState extends State<MyApp> {
 
   final List<Widget> _children = [
     HomeView(),
-    HomeView(),
+    DummyCard(),
     HomeView(),
     Aktivitas(),
     SignIn(),
@@ -66,7 +66,6 @@ class _HomeState extends State<MyApp> {
 
   @override
   void initState() {
-
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
     /** CEK VERSI PADA PLAYSTORE **/
@@ -75,6 +74,7 @@ class _HomeState extends State<MyApp> {
     jadwalService = JadwalService();
     spesialisasiService = SpesialisasiService();
     pasienService = PasienService();
+    userService = UserService();
 
     /** Convert Data Ke DropdownMenuItem **/
     spesialisasiService.getSpesialisasi().then((value) {
@@ -89,16 +89,18 @@ class _HomeState extends State<MyApp> {
       });
     });
 
-    /** Cek Apakah User Sudah Login**/
-    SharedPreferenceHelper.checkUserExist().then((value) {
-      if(value == true) {
-        SharedPreferenceHelper.getUser().then((value) {
+    /** Cek Apakah User Sudah Login **/
+    SharedPreferenceHelper.checkUserExist().then((isUserExist) async {
+      if(isUserExist == true) {
+        SharedPreferenceHelper.getUser().then((userData) {
           setState(() {
-            user = value!;
+            user = userData!;
             _children[4] = Profile();
+            /** AMBIL DATA PAIRING PASIEN DENGAN USER DI TABEL PAIRING **/
             pasienService.getPairing(user[2]).then((value) {
-              value.forEach((element) {
-                _saveToFirebase(user[2], element);
+              value.forEach((pasien) {
+                /** TAMBAH DATA TIAP PASIEN KE FIREBASE **/
+                _saveToFirebase(user[2], pasien);
               });
             });
           });
@@ -155,9 +157,6 @@ class _HomeState extends State<MyApp> {
   }
 
   void onTabTapped(int index) {
-    if(index == 1) {
-      ToastNotification.showNotification("Maaf, Fitur Belum Tersedia", context, Constant.color);
-    }
     if(index!=2) {
       setState(() {_currentIndex = index;});
     }
@@ -304,39 +303,45 @@ class _HomeState extends State<MyApp> {
       });
     }
   }
-}
 
-/*------------ Fungsi Firebase ------------*/
-
-_saveToFirebase(String idUser, Pasien pasien) async {
-  await Firebase.initializeApp();
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  FirebaseMessaging _fcm = FirebaseMessaging.instance;
-  /** HAPUS SEMUA PASIEN PADA ID USER TERSEBUT UNTUK MENGHINDARI DUPLIKAT DATA & UPDATE DEVICE TOKEN**/
-  var collection = await _db.collection("user").doc(idUser).collection("pasien").get();
-  for(var doc in collection.docs) {
-    doc.reference.delete();
-  }
-
-  /** TAMBAH SEMUA PASIEN PADA ID USER TERSEBUT **/
-  String? fcmToken = await _fcm.getToken();
-
-  if(fcmToken != null) {
-
-    var tokenRef = _db
-        .collection('user')
-        .doc(idUser)
-        .collection('pasien')
-        .doc(pasien.namaPasien);
-
-    await tokenRef.set({
-      'token' : fcmToken,
-      'no_rm'  : pasien.nomorRm,
-      'createAt' : FieldValue.serverTimestamp(),
-    });
-
-    await _db.collection("user").doc(idUser).set({
-      'createAt' : FieldValue.serverTimestamp(),
-    });
+  _saveToFirebase(String idUser, Pasien pasien) async {
+    await Firebase.initializeApp();
+    FirebaseMessaging _fcm = FirebaseMessaging.instance;
+    String? fcmToken = await _fcm.getToken();
+    userService.saveToFirebase(idUser, pasien, fcmToken.toString());
   }
 }
+
+
+// _saveToFirebase(String idUser, Pasien pasien) async {
+//   await Firebase.initializeApp();
+//   final FirebaseFirestore _db = FirebaseFirestore.instance;
+//   FirebaseMessaging _fcm = FirebaseMessaging.instance;
+//   /** HAPUS SEMUA PASIEN PADA ID USER TERSEBUT UNTUK MENGHINDARI DUPLIKAT DATA & UPDATE DEVICE TOKEN**/
+//   var collection = await _db.collection("user").doc(idUser).collection("pasien").get();
+//   for(var doc in collection.docs) {
+//     doc.reference.delete();
+//   }
+//
+//   /** TAMBAH SEMUA PASIEN PADA ID USER TERSEBUT **/
+//   String? fcmToken = await _fcm.getToken();
+//
+//   if(fcmToken != null) {
+//
+//     var tokenRef = _db
+//         .collection('user')
+//         .doc(idUser)
+//         .collection('pasien')
+//         .doc(pasien.namaPasien);
+//
+//     await tokenRef.set({
+//       'token' : fcmToken,
+//       'no_rm'  : pasien.nomorRm,
+//       'createAt' : FieldValue.serverTimestamp(),
+//     });
+//
+//     await _db.collection("user").doc(idUser).set({
+//       'createAt' : FieldValue.serverTimestamp(),
+//     });
+//   }
+// }
