@@ -4,8 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 
 class URL {
-  static String devAddress = "http://192.167.4.32:3001/api/v1/";
-  static String prodAddress = "";
+  static String urlAddress = "https://appbk01.droensolobaru.com/api/v1/";
+  // static String mockAddress = "http://192.167.4.32:3001/api/v1/";
   static const id = "ancient one";
   static const password = "secretkey";
 
