@@ -4,6 +4,7 @@ part 'banner.g.dart';
 @JsonSerializable()
 class BannerModel {
   final String url;
+  final String judul;
   @JsonKey(name: "url_detail_banner")
   final String? urlDetailBanner;
   @JsonKey(name: "url_sumber")
@@ -13,6 +14,7 @@ class BannerModel {
 
   BannerModel({
     required this.url,
+    required this.judul,
     required this.urlDetailBanner,
     required this.urlSumberBerita,
     required this.deskripsi,
