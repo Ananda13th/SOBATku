@@ -79,6 +79,8 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
     dropdownvalue = widget.namaSpesialisasi;
     dateTime = widget.tanggalDipilih;
 
+
+
     /** Inisialisasi Service **/
     transaksiService = TransaksiService();
     jadwalService =JadwalService();
@@ -100,6 +102,8 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
           value: spesialisasi.namaSpesialisasi)
       );
     });
+
+    cekJadwalCuti();
   }
 
   @override
@@ -124,16 +128,6 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                     itemBuilder: (context, index) {
                       /** MELAKUKAN CEK PADA TABEL DAFTAR CUTI BILA ADA JADWAL PRAKTIK OLEH DOKTER YANG SEDANG CUTI**/
                       JadwalDokter jadwalDokter = listJadwal[index];
-                      for(int test = 0;test <jadwalDokter.jadwalPraktek.length; test++) {
-                        cutiService.cekCuti(jadwalDokter.kodeDokter + "." + DateFormat("yyMMdd").format(dateTime) + jadwalDokter.jadwalPraktek[test].jam.substring(0,2)).then((value) {
-                          if(value)
-                            if(mounted)
-                              setState(() {
-                                /** Tambah keterangan cuti bila ditemukan jadwal pada tabel jadwal_cuti **/
-                                jadwalDokter.jadwalPraktek[test].jam = jadwalDokter.jadwalPraktek[test].jam.substring(0,11) + "\n(Sedang Cuti)";
-                              });
-                        });
-                      }
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
@@ -196,6 +190,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
           selectedColor: Constant.color,
           selectedTextStyle:TextStyle(color: Colors.white),
           spacing: 10,
+          textAlign: TextAlign.center,
           direction: Axis.horizontal,
           unselectedColor:  Colors.lightGreen[300],
           borderRadius: BorderRadius.circular(30),
@@ -211,6 +206,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
         selectedColor: Colors.grey[300],
         selectedTextStyle: TextStyle(color: Colors.black),
         spacing: 10,
+        textAlign: TextAlign.center,
         direction: Axis.horizontal,
         unselectedColor: Colors.grey[300],
         borderRadius: BorderRadius.circular(30),
@@ -280,6 +276,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
           return Scaffold(
               backgroundColor: Colors.transparent,
               body: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                /** TAMPIL DIALOG UNTUK PILIH PEMBAYARAN & PASIEN **/
                 return AlertDialog(
                     contentPadding: EdgeInsets.zero,
                     content:
@@ -412,15 +409,16 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                 child: ElevatedButton(
                                     style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color)),
                                     onPressed: () {
+                                      print(noRm);
                                       TransaksiReq transaksi = new TransaksiReq(
                                           kodeJadwal: kodeJadwal,
                                           kodeDokter: jadwalDokter.kodeDokter,
                                           nomorRm: noRm,
                                           tipe: tipe);
-                                      if(tipe == "2") {
+                                      if(tipe == "9") {
                                         bpjsService.cekRujukan(noBpjs).then((value) {
                                           print(value);
-                                          if (value == "aktif") {
+                                          if (value.toString() != "Rujukan Tidak Ada") {
                                             transaksiService.createTransaksi(transaksi, idUser).then((value) {
                                               Color color = Constant.color;
                                               if (value != "Antrian berhasil dibuat.")
@@ -464,14 +462,11 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                                   )
                                               )
                                           );
-                                          Future.delayed(
-                                              Duration(seconds: 3), () {
-                                            Navigator.pop(context);
-                                          });
                                         });
                                       }
                                     },
-                                    child: Text("Daftar")),
+                                    child: Text("Daftar")
+                                ),
                               ),
                             )
                           ],
@@ -533,6 +528,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                 jadwalService.getJadwalDokter(kodeSpesialisasi.toString(),dayInNumber).then((value) {
                   setState(() {
                     listJadwal = value;
+                    cekJadwalCuti();
                   });
                 });
               });
@@ -547,6 +543,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                 onTap: (){showCalendar(context);},
                 child: TextField(
                   decoration: InputDecoration(
+                    icon: Icon(Icons.calendar_today),
                     border: InputBorder.none,
                     labelText: 'Pilih Tanggal',
                   ),
@@ -579,6 +576,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
         jadwalService.getJadwalDokter(kodeSpesialisasi.toString(), dayInNumber).then((value) {
           setState(() {
             listJadwal = value;
+            cekJadwalCuti();
           });
         });
       });
@@ -617,6 +615,23 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
         );
       },
     );
+  }
+
+  Future<void> cekJadwalCuti() async {
+    listJadwal.forEach((jadwalDokter) {
+      for (int test = 0; test < jadwalDokter.jadwalPraktek.length; test++) {
+        cutiService.cekCuti(jadwalDokter.kodeDokter + "." + DateFormat("yyMMdd").format(dateTime) + jadwalDokter.jadwalPraktek[test].jam.substring(0, 2)).then((value) {
+          if (value)
+            if (mounted)
+              setState(() {
+                /** Tambah keterangan cuti bila ditemukan jadwal pada tabel jadwal_cuti **/
+                jadwalDokter.jadwalPraktek[test].jam =
+                    jadwalDokter.jadwalPraktek[test].jam.substring(0, 5) +
+                        "\n(Dokter Cuti)";
+              });
+        });
+      }
+    });
   }
 
 
