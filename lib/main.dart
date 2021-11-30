@@ -1,4 +1,6 @@
 // @dart=2.9
+import 'dart:io';
+
 import 'package:after_layout/after_layout.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -14,12 +16,22 @@ import 'helper/local_notification.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   messageHandler();
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],
-  ); // To turn off landscape mode
+  );// To turn off landscape mode
+  HttpOverrides.global = new MyHttpOverrides();
   runApp(App());
+}
+
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
 }
 
 class App extends StatelessWidget  {
@@ -77,9 +89,6 @@ class SplashState extends State<Splash> with AfterLayoutMixin<Splash> {
 
 
 Future<void> messageHandler() async {
-
-  await Firebase.initializeApp();
-
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
