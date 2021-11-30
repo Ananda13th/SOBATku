@@ -2,7 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:sobatku/helper/constant.dart';
+import 'package:sobatku/page/dashboard.dart';
 import 'package:sobatku/page/sign_in.dart';
+
+import 'halaman_utama.dart';
 
 class IntroScreen extends StatelessWidget {
   final List<String> images = ["assets/images/Akun Dr Oen 1.png","assets/images/Akun Dr Oen 2.png","assets/images/Akun Dr Oen 3.png","assets/images/Akun Dr Oen 4.png"];
@@ -87,7 +90,15 @@ class IntroScreen extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK'),
+              child: const Text('Lanjutkan Sebagai Tamu'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                    new MaterialPageRoute(builder: (context) => new MyApp()));
+              },
+            ),
+            TextButton(
+              child: const Text('Masuk'),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
