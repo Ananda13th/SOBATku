@@ -64,7 +64,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
   late String idUser;
   //Dummy Index
   late int selectedIndex = 11;
-  late DateTime dateTime;
+  late DateTime dateTimeFromCalendar;
 
 
   @override
@@ -77,10 +77,8 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
     daftarSpesialisasi = widget.listSpesialisasi;
     kodeSpesialisasi = widget.idSpesialisasi;
     dropdownvalue = widget.namaSpesialisasi;
-    dateTime = widget.tanggalDipilih;
-
-
-
+    dateTimeFromCalendar = widget.tanggalDipilih;
+    
     /** Inisialisasi Service **/
     transaksiService = TransaksiService();
     jadwalService =JadwalService();
@@ -151,7 +149,9 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                 child: SizedBox(
                                   width: 100,
                                   height: 100,
-                                  child: Image.asset("assets/images/profileAvatar.png"),
+                                  child: jadwalDokter.foto != "" ? CircleAvatar(
+                                    backgroundImage: NetworkImage(jadwalDokter.foto),
+                                  ) : Image.asset("assets/images/profileAvatar.png"),
                                 ),
                               ),
                               Flexible(
@@ -183,12 +183,20 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
 
   Widget _buttonView (JadwalDokter jadwalDokter, BuildContext context) {
     List<String> value = [];
+    var indexCuti = List<int>.empty(growable: true);
     value = jadwalDokter.jadwalPraktek.map((e) => e.jam).toList();
+
+    for(int i = 0; i<value.length; i++) {
+      if(value[i].contains("Cuti"))
+        indexCuti.add(i);
+    }
+
     /** BILA USER SUDAH LOGIN, MAKA TOMBOL AKAN BERWARNA HIJAU**/
     if(isUserExist) {
       return GroupButton(
           selectedColor: Constant.color,
           selectedTextStyle:TextStyle(color: Colors.white),
+          disabledButtons: indexCuti,
           spacing: 10,
           textAlign: TextAlign.center,
           direction: Axis.horizontal,
@@ -219,7 +227,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
     }
   }
 
-  /*------------ Menampilkan Pasien Dan Metode Pembayaran Sebelum Daftar ------------*/
+  /// ------------ Menampilkan Pasien Dan Metode Pembayaran Sebelum Daftar ------------ ///
 
   Future<void> _buildPasienListDialog(BuildContext context, JadwalDokter jadwalDokter, String jam) async {
     final now = DateTime.now();
@@ -233,8 +241,12 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
 
     /** PEMBUATAN KODE JADWAL **/
 
+    /** MENGAMBIL TANGGAL HARI MINGGU SEBELUMNYA **/
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
-    /** MEMBUAT DAFTAR TANGGAL SAMPAI 15 HARI KEDEPAN **/
+
+    /** MEMBUAT DAFTAR TANGGAL SAMPAI 15 HARI KEDEPAN DIMULAI DARI AWAL MINGGU
+     *  CONTOH : SEKARANG HARI SELASA TANGGAL 5, MAKA TANGGAL YANG DIGENERATE MULAI TANGGAL 3 SAMPAI 2 MINGGU KEDEPAN
+     * **/
     List dayList = List.generate(15, (index) => index)
         .map((value) => DateFormat('dd')
         .format(firstDayOfWeek.add(Duration(days: value))))
@@ -246,12 +258,22 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
         .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
 
-    if(jadwalDokter.hari < now.weekday) {
-      kodeJadwal = jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari+7] + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
-    }
-    else {
-      kodeJadwal = jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari] + dayList[jadwalDokter.hari] + jam.substring(0, 2);
-    }
+    /** MELAKUKAN CEK APAKAH TANGGAL JADWAL YANG DIPILIH MERUPAKAN HARI SEBELUM HARI INI
+     *  CONTOH : BILA SEKARANG HARI SABTU, JADWAL YANG DIPILIH HARI SENIN, MAKA KODE JADWAL UNTUK TANGGAL DITAMBAH 7
+     *  DAN
+     *  MELAKUKAN CEK BILA HARI YANG DIPILIH MERUPAKAN HARI INI TAPI TANGGAL 7 HARI KEDEPAN
+     *  CONTOH : SEKARAG HARI SABTU TANGGAL 3, YANG DIPILIH HARI SABTU TANGGAL 10, MAKA KODE JADWAL UNTUK TANGGAL DITAMBAH 7
+     * **/
+
+    // if(jadwalDokter.hari < now.weekday || jadwalDokter.hari == now.weekday && dateTimeFromCalendar.isAfter(now)) {
+    //   kodeJadwal = jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari+7] + dayList[jadwalDokter.hari + 7] + jam.substring(0, 2);
+    // }
+    // else {
+    //   kodeJadwal = jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari] + dayList[jadwalDokter.hari] + jam.substring(0, 2);
+    // }
+
+    /// PEMBUATAN KODE JADWAL AMBIL DARI KALENDER
+    kodeJadwal = jadwalDokter.kodeDokter + "." + DateFormat("yyMMdd").format(dateTimeFromCalendar)+ jam.substring(0, 2);
     print("Kode Jadwal : "+kodeJadwal);
 
     /** CEK ADA ATAU TIDAK KODE JADWAL PADA TABEL CUTI**/
@@ -310,55 +332,77 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                               List<Pasien> patients = snapshot.data;
                               return Container(
                                 width: MediaQuery.of(context).size.width,
-                                height: 180,
-                                child: ListView.separated(
-                                    separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1, height: 5),
-                                    itemCount: patients.length,
-                                    itemBuilder: (context, index) {
-                                      Pasien patient = patients[index];
-                                      return Row(
-                                        children: <Widget>[
-                                          Flexible(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    selectedIndex = index;
-                                                    noRm = patient.nomorRm;
-                                                    noBpjs = patient.nomorBpjs;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  width: MediaQuery.of(context).size.width,
-                                                  child: ListTile(
-                                                    title: Padding(
-                                                      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                                      child: Center(
-                                                          child: Text(
-                                                            patient.namaPasien,
-                                                            style: TextStyle(
-                                                                color:  selectedIndex == index ? Constant.color : Colors.black,
-                                                                fontWeight: FontWeight.bold
+                                height: 250,
+                                child: RawScrollbar(
+                                  thumbColor: Constant.color,
+                                  thickness: 5,
+                                  isAlwaysShown: true,
+                                  child: ListView.separated(
+                                      separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.transparent, thickness: 1, height: 1),
+                                      itemCount: patients.length,
+                                      itemBuilder: (context, index) {
+                                        Pasien pasien = patients[index];
+                                        return Row(
+                                          children: <Widget>[
+                                            Flexible(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      selectedIndex = index;
+                                                      noRm = pasien.nomorRm;
+                                                      noBpjs = pasien.nomorBpjs;
+                                                    });
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(3),
+                                                    child: Card(
+                                                      color:  selectedIndex == index ? Colors.green : Colors.black54,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(15.0),
+                                                      ),
+                                                      child: ListTile(
+                                                        leading: pasien.jenisKelamin.toLowerCase() == "l" ? Image.asset("assets/icons/avatar_l.png", fit: BoxFit.fill) : Image.asset("assets/icons/avatar_p.png", fit: BoxFit.contain),
+                                                        title: Text(pasien.namaPasien, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                                                        subtitle: Column(
+                                                          children: [
+                                                            SizedBox(height: 5),
+                                                            Align(
+                                                                alignment: Alignment.centerLeft,
+                                                                child: Text("Nomor RM : " + pasien.nomorRm, style: TextStyle(color: Colors.white, fontSize: 12))
                                                             ),
-                                                          )
+                                                            SizedBox(height: 5),
+                                                            Align(
+                                                                alignment: Alignment.centerLeft,
+                                                                child: Text("Nomor BPJS : " + pasien.nomorBpjs, style: TextStyle(color: Colors.white, fontSize: 12))
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              )
-                                          )
-                                        ],
-                                      );
-                                    }
+                                                )
+                                            )
+                                          ],
+                                        );
+                                      }
+                                  ),
                                 ),
                               );
                             }
                             else {
-                              return Center(
-                                child: Container(),
+                              return Container(
+                                height: 250,
+                                width: 335,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: Constant.color,
+                                  )
+                                ),
                               );
                             }
                           },
                         ),
+                        SizedBox(height: 3),
                         Row(
                           children: [
                             Expanded(
@@ -366,27 +410,27 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                 height: 40,
                                 color: Constant.color,
                                 child: Center(
-                                  child: Text("Pilih Pembayaran",
-                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                                  child: Text(
+                                    "Pilih Pembayaran",
+                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)
+                                  ),
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(
-                            height: 20
-                        ),
+                        SizedBox(height: 10),
                         Row(
                           children: [
                             Expanded(
                               child: Container(
-                                height: 80,
+                                height: 50,
                                 child: GroupButton(
-                                    selectedColor: Constant.color,
+                                    selectedColor: Colors.green,
                                     selectedTextStyle: TextStyle(color: Colors.white),
                                     spacing: 10,
                                     direction: Axis.horizontal,
-                                    unselectedColor: Colors.grey[300],
+                                    unselectedColor: Colors.grey,
                                     borderRadius: BorderRadius.circular(30),
                                     isRadio: true,
                                     buttons: data,
@@ -398,14 +442,11 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                             )
                           ],
                         ),
-                        SizedBox(
-                            height: 20
-                        ),
                         Row(
                           children: [
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.only(left: 8, right: 8),
                                 child: ElevatedButton(
                                     style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color)),
                                     onPressed: () {
@@ -416,8 +457,8 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                           nomorRm: noRm,
                                           tipe: tipe);
                                       if(tipe == "9") {
+                                        /** MELAKUKAN PENGECEKAN APAKAH ADA RUJUKAN BPJS KE RUMAH SAKIT **/
                                         bpjsService.cekRujukan(noBpjs).then((value) {
-                                          print(value);
                                           if (value.toString() != "Rujukan Tidak Ada") {
                                             transaksiService.createTransaksi(transaksi, idUser).then((value) {
                                               Color color = Constant.color;
@@ -425,7 +466,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                                 color = Colors.red;
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
-                                                  duration: Duration(seconds: 2),
+                                                  duration: Duration(seconds: 4),
                                                   backgroundColor: color,
                                                   content: Text(
                                                     value,
@@ -436,7 +477,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                                   )
                                                 )
                                               );
-                                              Future.delayed(Duration(seconds: 3), () {Navigator.pop(context);});
+                                              Future.delayed(Duration(seconds: 4), () {Navigator.pop(context);});
                                             });
                                           }
                                           else {
@@ -451,7 +492,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                             color = Colors.red;
                                           ScaffoldMessenger.of(context).showSnackBar(
                                               SnackBar(
-                                                  duration: Duration(seconds: 2),
+                                                  duration: Duration(seconds: 4),
                                                   backgroundColor: color,
                                                   content: Text(
                                                       value,
@@ -475,12 +516,17 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                           children: [
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.only(left: 8, right: 8),
                                 child: ElevatedButton(
-                                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.grey)),
+                                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.redAccent)),
                                     onPressed: () {
                                       if (Navigator.canPop(context)) {
                                         Navigator.pop(context);
+                                        setState(() {
+                                          selectedIndex = 11;
+                                          noRm = "";
+                                          noBpjs = "";
+                                        });
                                       } else {
                                         SystemNavigator.pop();
                                       }
@@ -564,14 +610,14 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
       cancelText: "Batal",
       confirmText: "OK",
       context: context,
-      initialDate: dateTime,
+      initialDate: dateTimeFromCalendar,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(Duration(days: 7)));
     if(picked != null && picked != now) {
       setState(() {
         txtController.text = DateFormat('dd-MM-yyyy').format(picked);
         datePickedFormatted = DateFormat('dd-MM-yyyy').format(picked);
-        dateTime = picked;
+        dateTimeFromCalendar = picked;
         dayInNumber = DayConverter.convertToNumber(DateFormat('EEEE').format(picked)).toString();
         jadwalService.getJadwalDokter(kodeSpesialisasi.toString(), dayInNumber).then((value) {
           setState(() {
@@ -619,14 +665,14 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
 
   Future<void> cekJadwalCuti() async {
     listJadwal.forEach((jadwalDokter) {
-      for (int test = 0; test < jadwalDokter.jadwalPraktek.length; test++) {
-        cutiService.cekCuti(jadwalDokter.kodeDokter + "." + DateFormat("yyMMdd").format(dateTime) + jadwalDokter.jadwalPraktek[test].jam.substring(0, 2)).then((value) {
+      for (int index = 0; index < jadwalDokter.jadwalPraktek.length; index++) {
+        cutiService.cekCuti(jadwalDokter.kodeDokter + "." + DateFormat("yyMMdd").format(dateTimeFromCalendar) + jadwalDokter.jadwalPraktek[index].jam.substring(0, 2)).then((value) {
           if (value)
             if (mounted)
               setState(() {
                 /** Tambah keterangan cuti bila ditemukan jadwal pada tabel jadwal_cuti **/
-                jadwalDokter.jadwalPraktek[test].jam =
-                    jadwalDokter.jadwalPraktek[test].jam.substring(0, 5) +
+                jadwalDokter.jadwalPraktek[index].jam =
+                    jadwalDokter.jadwalPraktek[index].jam.substring(0, 5) +
                         "\n(Dokter Cuti)";
               });
         });
