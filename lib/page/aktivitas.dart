@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +38,6 @@ class _AktivitasState extends State<Aktivitas> {
             value.forEach((element) {
               setState(() {
                 daftarTransaksi.add(element);
-                print(daftarTransaksi.length);
               });
             });
           });
@@ -55,6 +53,7 @@ class _AktivitasState extends State<Aktivitas> {
 
   @override
   Widget build(BuildContext context) {
+    precacheImage(AssetImage("assets/images/error_picture.jpg"), context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -85,8 +84,17 @@ class _AktivitasState extends State<Aktivitas> {
                         builder: (BuildContext context, AsyncSnapshot snapshot) {
                           if(snapshot.hasError) {
                             print(snapshot);
-                            return Center(
-                              child: Text("Error"),
+                            return Container(
+                              color: Colors.white,
+                              height: MediaQuery.of(context).size.height,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset("assets/images/error_picture.jpg", fit: BoxFit.contain),
+                                  Text("Maaf, Terjadi Kesalahan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26)),
+                                ],
+                              ),
                             );
                           } else if (snapshot.hasData){
                             List<TransaksiResp> response =daftarTransaksi;
@@ -100,8 +108,16 @@ class _AktivitasState extends State<Aktivitas> {
                             });
                             return _buildListAktivitas(aktif, "aktif");
                           } else {
-                            return Center(
-                              child: Container(),
+                            return Container(
+                              child: Center(
+                                  child: Container(
+                                    width: 150,
+                                    height: 150,
+                                    child: CircularProgressIndicator(
+                                      color: Constant.color,
+                                    ),
+                                  )
+                              ),
                             );
                           }
                         },
@@ -125,8 +141,17 @@ class _AktivitasState extends State<Aktivitas> {
                         builder: (BuildContext context, AsyncSnapshot snapshot) {
                           if(snapshot.hasError) {
                             print(snapshot);
-                            return Center(
-                              child: Text("Error"),
+                            return Container(
+                              color: Colors.white,
+                              height: MediaQuery.of(context).size.height,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset("assets/images/error_picture.jpg", fit: BoxFit.contain),
+                                  Text("Maaf, Terjadi Kesalahan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 26)),
+                                ],
+                              ),
                             );
                           } else if (snapshot.hasData) {
                             List<TransaksiResp> response = daftarTransaksi;
@@ -140,8 +165,16 @@ class _AktivitasState extends State<Aktivitas> {
                             });
                             return _buildListAktivitas(riwayat, "riwayat");
                           } else {
-                            return Center(
-                              child: Container(),
+                            return Container(
+                              child: Center(
+                                  child: Container(
+                                    width: 150,
+                                    height: 150,
+                                    child: CircularProgressIndicator(
+                                      color: Constant.color,
+                                    ),
+                                  )
+                              ),
                             );
                           }
                         },
@@ -157,65 +190,107 @@ class _AktivitasState extends State<Aktivitas> {
   }
 
   Widget _buildListAktivitas(List<TransaksiResp> response, String tipe) {
-
     return ListView.separated(
         separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1),
         itemCount: response.length,
         itemBuilder: (context, index) {
           TransaksiResp tResp = response[index];
-          return Row(
-            children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    color: Colors.transparent,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Pasien", style: TextStyle(fontSize: 12)),
-                        Text(tResp.namaPasien, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text("Dokter", style: TextStyle(fontSize: 12)),
-                        Text(tResp.namaDokter, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text("Spesialis", style: TextStyle(fontSize: 12)),
-                        Text(tResp.spesialis, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text("Waktu", style: TextStyle(fontSize: 12)),
-                        Text(DateFormat("dd-MM-yyy").format(DateTime.parse(tResp.tanggal)) + " " + tResp.waktu, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
-                      ],
-                    )
-                  ),
+          return Padding(
+            padding: const EdgeInsets.only(left: 5, right: 5, top: 5),
+            child: Container(
+              height: 245,
+              child: Card(
+                color: tipe == "aktif" ? Constant.color.withOpacity(0.4) : Colors.grey,
+                elevation: 10,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+                child: Stack(
                   children: [
-                    Text("No. Antrian Anda", style: TextStyle(fontSize: 12)),
-                    Text(tResp.antrian, style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
-                    Text("Antrian Berjalan", style: TextStyle(fontSize: 12)),
-                    Text(tResp.antrianBerjalan, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    tipe == "aktif" ?
-                    InkWell(
-                      onTap: (){_buildQr(context, tResp).then((value) => Screen.setBrightness(value));},
-                      child: QrImage(
-                        data: tResp.kodeJadwal + "." + tResp.antrian + "." + tResp.nomorRm,
-                        version: QrVersions.auto,
-                        size: 75.0,
+                    Opacity(
+                      opacity: 0.6,
+                      child: Center(
+                        child: Container(
+                          child: Image.asset(
+                            "assets/images/LogoRs.png",
+                            scale: 3,
+                            fit: BoxFit.scaleDown,
+                          ),
+                        ),
                       ),
-                    ) :
-                    Container(
-                        height: 75,
-                        child: Column(
-                          children: [
-                            Text("Kode Booking : "),
-                            Center(child: Text(tResp.kodeJadwal + "." + tResp.antrian + "." + tResp.nomorRm, style: TextStyle(fontWeight: FontWeight.bold))),
-                          ],
-                        )
-                    )
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: <Widget> [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Pasien", style: TextStyle(fontSize: 13)),
+                                    Text(tResp.namaPasien, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text("Dokter", style: TextStyle(fontSize: 13)),
+                                    Text(tResp.namaDokter, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text("Spesialis", style: TextStyle(fontSize: 13)),
+                                    Text(tResp.spesialis, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text("Tanggal", style: TextStyle(fontSize: 13)),
+                                    Text(DateFormat("dd-MM-yyy").format(DateTime.parse(tResp.tanggal)), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text("Jam", style: TextStyle(fontSize: 13)),
+                                    Text(tResp.waktu, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                                  ],
+                                )
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Text("No. Antrian Anda", style: TextStyle(fontSize: 13)),
+
+                                tipe == "aktif" ?
+                                  Text(tResp.antrian, style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold))
+                                :
+                                  Text("-", style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
+
+                                Text("Antrian Berjalan", style: TextStyle(fontSize: 13)),
+
+                                tipe == "aktif" ?
+                                  Text(tResp.antrian, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
+                                :
+                                  Text("-", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+
+                                InkWell(
+                                  onTap: () {
+                                    _buildQr(context, tResp).then((value) => Screen.setBrightness(value));
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      height: 80,
+                                      width: 80,
+                                      color: Colors.white,
+                                      child: QrImage(
+                                        data: tResp.kodeJadwal + "." + tResp.antrian + "." + tResp.nomorRm,
+                                        version: QrVersions.auto,
+                                        size: 75.0,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ]
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ]
                 ),
-              )
-            ],
+              ),
+            ),
           );
         }
     );
@@ -227,8 +302,14 @@ class _AktivitasState extends State<Aktivitas> {
     setState(() {});
   }
 
+  Future<double> getScreeenBrigthness() async {
+    double currentBrightness = await Screen.brightness;
+    return currentBrightness;
+  }
+
   Future<double> _buildQr(BuildContext context, TransaksiResp tResp) async {
     double currentBrightness = await Screen.brightness;
+    print(currentBrightness);
     Screen.setBrightness(1);
     await showDialog(
       barrierColor: Constant.color,
