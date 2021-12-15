@@ -16,13 +16,13 @@ class SharedPreferenceHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? data = prefs.getStringList('user');
     if(data == null)
-      return ["","",""];
+      return ["","","", ""];
     return data;
   }
 
   static Future<void> logOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setStringList("user", ["","",""]);
+    prefs.setStringList("user", ["","","", ""]);
     prefs.setBool("userExist", false);
   }
 
