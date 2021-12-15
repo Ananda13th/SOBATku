@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/day_converter.dart';
+import 'package:sobatku/helper/loginAlert.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
+import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/model/dokter.dart';
 import 'package:sobatku/model/jadwal_dokter.dart';
 import 'package:sobatku/model/spesialisasi.dart';
@@ -167,7 +169,10 @@ class _FavoriteListState extends State<FavoriteList> {
                                   title: Text(dokter.namaDokter, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.left),
                                   subtitle: Text(dokter.spesialisasi, style: TextStyle(fontSize: 16)),
                                 ),
-                                onTap: (){_buildDetailDokterDialog(context, jadwalService, dokter);},
+                                onTap: () async {
+                                  List<JadwalDokter> listJadwalDokter = await cekCuti(dokter);
+                                  _buildDetailDokterDialog(context, jadwalService, listJadwalDokter, dokter);
+                                },
                               ),
                             )
                         )
@@ -185,110 +190,124 @@ class _FavoriteListState extends State<FavoriteList> {
 
   /*------------ Menampilkan Detail Dokter ------------*/
 
-  Future<void> _buildDetailDokterDialog(BuildContext context, JadwalService scheduleService, Dokter dokter) async {
+  Future<void> _buildDetailDokterDialog(BuildContext context, JadwalService scheduleService,  List<JadwalDokter> listJadwalDokter, Dokter dokter) async {
     await showDialog(
       context: context,
       builder: (context) {
-        return Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 40),
-              child: AlertDialog(
+        return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return  AlertDialog(
                 contentPadding: EdgeInsets.zero,
-                content: Stack(
+                content: Column(
                   children: [
-                    Column(
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        height: 150,
+                        width: 150,
+                        child: dokter.foto != "" ? CircleAvatar(
+                          backgroundImage: NetworkImage(dokter.foto),
+                        ) : Image.asset("assets/images/profileAvatar.png"),
+                      ),
+                    ),
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                  height: 140,
-                                  color: Constant.color,
-                                  child: Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(bottom: 5),
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 5, right: 5),
-                                        child: Text(
-                                            dokter.namaDokter,
-                                            style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 20),
-                                            textAlign: TextAlign.center,
-                                        ),
-                                      ),
+                        Expanded(
+                          child: Container(
+                              height: 40,
+                              color: Constant.color,
+                              child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 5, right: 5),
+                                    child: Text(
+                                      dokter.namaDokter,
+                                      style:TextStyle(fontWeight: FontWeight.bold,color: Colors.white,fontSize: 16),
+                                      textAlign: TextAlign.center,
                                     ),
                                   )
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Text(dokter.spesialisasi, style:TextStyle(fontSize: 18)),
-                        SizedBox(height: 10),
-                        Divider(
-                          color: Colors.black,
-                          thickness: 2,
-                        ),
-                        Text("Jadwal Praktek", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        Divider(
-                          color: Colors.black,
-                          thickness: 2,
-                        ),
-                        FutureBuilder<List<JadwalDokter>>(
-                            future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
-                            builder: (BuildContext context, AsyncSnapshot snapshot) {
-                              if(snapshot.hasError)
-                                return Container(
-                                  width: 300,
-                                  height: 290,
-                                  child: Center(child: Text("Terjadi Kesalahan")),
-                                );
-                              if(snapshot.hasData){
-                                List<JadwalDokter> listJadwalDokter = snapshot.data;
-                                if(listJadwalDokter.isEmpty)
-                                  return Container(
-                                    width: 300,
-                                    height: 290,
-                                    child: Center(child: Text("Belum Ada Jadwal", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-                                  );
-                                else
-                                  return _buildListJadwal(listJadwalDokter, dokter);
-                              } else {
-                                return Container(
-                                  width: 300,
-                                  height: 290,
-                                  child: Center(child: Image.network("https://c.tenor.com/K2UGDd4acJUAAAAM/load-loading.gif", fit: BoxFit.scaleDown)),
-                                );
-                              }
-                            }
+                              )
+                          ),
                         ),
                       ],
                     ),
-                  ]
+                    SizedBox(height: 10),
+                    Text(dokter.spesialisasi, style:TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10),
+                    Divider(
+                      color: Colors.black,
+                      thickness: 2,
+                    ),
+                    Text("Jadwal Praktek", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Divider(
+                      color: Colors.black,
+                      thickness: 2,
+                    ),
+                    Flexible(
+                      child: FutureBuilder<List<JadwalDokter>>(
+                          future: scheduleService.getJadwalDokterById(dokter.kodeDokter),
+                          builder: (BuildContext context, AsyncSnapshot snapshot) {
+                            if(snapshot.hasError) {
+                              return Container(
+                                width: 300,
+                                height: 290,
+                                child: Center(child: Text("Terjadi Kesalahan")),
+                              );
+                            }
+                            if(snapshot.hasData){
+                              if(listJadwalDokter.isEmpty)
+                                return Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                            child: Center(child: Text("Belum Ada Jadwal", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)))),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(left: 5, right: 5),
+                                                  child: ElevatedButton(
+                                                      onPressed: () { Navigator.pop(context); },
+                                                      child: Text("Tutup"),
+                                                      style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color))
+                                                  ),
+                                                )
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              else
+                                return _buildListJadwal(listJadwalDokter, dokter);
+                            } else {
+                              return Container(
+                                width: 300,
+                                height: 290,
+                                child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: Constant.color,
+                                    )
+                                ),
+                              );
+                            }
+                          }
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                height: 150,
-                width: 150,
-                child: dokter.foto != "" ? CircleAvatar(
-                  backgroundImage: NetworkImage(dokter.foto),
-                ) : Image.asset("assets/images/profileAvatar.png"),
-              ),
-            ),
-          ]
+              );
+            }
         );
       },
     );
   }
 
-  /*------------ Menampilkan Jadwal Dokter ------------*/
+  /// ------------ Menampilkan Jadwal Dokter ------------ ///
 
   Widget _buildListJadwal(List<JadwalDokter> jadwalDokter, Dokter dokter) {
-
     String tanggal = "";
     final now = DateTime.now();
     final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
@@ -302,11 +321,14 @@ class _FavoriteListState extends State<FavoriteList> {
         .format(firstDayOfWeek.add(Duration(days: value))))
         .toList();
 
-    return SingleChildScrollView(
+    return RawScrollbar(
+      thumbColor: Constant.color,
+      isAlwaysShown: true,
+      thickness: 10,
       child: Column(
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.height*45/100,
+            height: MediaQuery.of(context).size.height*44/100,
             width: 300,
             child: ListView.separated(
                 separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.grey[400]),
@@ -322,32 +344,44 @@ class _FavoriteListState extends State<FavoriteList> {
                       Row(
                         children: <Widget>[
                           Flexible(
-                              child: SizedBox(
-                                child: ListTile(
-                                  title: Center(
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            DayConverter.convertToDay(jadwal.hari),
+                            child: Container(
+                              height : 35,
+                              child: ListTile(
+                                title: Center(
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                            jadwal.hari < now.weekday ?  DayConverter.convertToDay(jadwal.hari) + ", "+  listTanggalFormatTampil[jadwal.hari + 7] :   DayConverter.convertToDay(jadwal.hari) + ", "+  listTanggalFormatTampil[jadwal.hari],
                                             style: TextStyle(fontWeight: FontWeight.bold)
-                                          ),
-                                          Text(
-                                              jadwal.hari < now.weekday ? listTanggalFormatTampil[jadwal.hari + 7] : listTanggalFormatTampil[jadwal.hari]
-                                          )
-                                        ],
-                                      )
-                                  ),
+                                        ),
+                                      ],
+                                    )
                                 ),
-                              )
+                              ),
+                            ),
                           )
                         ],
                       ),
-                      _buttonView(jadwal, tanggal, dokter, context)
+                      _buttonView(jadwal, tanggal, dokter, context),
                     ],
                   );
                 }
             ),
           ),
+          Row(
+            children: [
+              Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 5, right: 5),
+                    child: ElevatedButton(
+                        onPressed: () { Navigator.pop(context); },
+                        child: Text("Tutup"),
+                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color))
+                    ),
+                  )
+              )
+            ],
+          )
         ],
       ),
     );
@@ -355,10 +389,19 @@ class _FavoriteListState extends State<FavoriteList> {
 
   Widget _buttonView (JadwalDokter jadwalDokter, String tanggal, Dokter dokter, BuildContext context) {
     List<String> value = [];
+    var indexCuti = List<int>.empty(growable: true);
     value = jadwalDokter.jadwalPraktek.map((e) => e.jam).toList();
+
+    for(int i = 0; i<value.length; i++) {
+      if(value[i].contains("Cuti"))
+        indexCuti.add(i);
+    }
+
     if(user) {
       return GroupButton(
+        textAlign: TextAlign.center,
         selectedColor: Constant.color,
+        disabledButtons: indexCuti,
         selectedTextStyle:TextStyle(color: Colors.white),
         spacing: 10,
         direction: Axis.horizontal,
@@ -367,16 +410,26 @@ class _FavoriteListState extends State<FavoriteList> {
         isRadio: true,
         buttons: value,
         onSelected: (int index, bool isSelected) {
-          List<JadwalDokter> data = [jadwalDokter];
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => JadwalSpesifik(dataJadwalDokter: data, tanggalDipilih: DateTime.parse(tanggal), listSpesialisasi: daftarSpesialisasi, idSpesialisasi: dokter.kodeSpesialisasi, namaSpesialisasi: dokter.spesialisasi),)
-          );
+          if(value[index].contains("Cuti"))
+            ToastNotification.showNotification("Dokter Sedang Cuti", context, Colors.red);
+          else {
+            List<JadwalDokter> data = [jadwalDokter];
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => JadwalSpesifik(
+                    dataJadwalDokter: data,
+                    tanggalDipilih: DateTime.parse(tanggal),
+                    listSpesialisasi: daftarSpesialisasi, idSpesialisasi:
+                dokter.kodeSpesialisasi,
+                    namaSpesialisasi: dokter.spesialisasi)
+                )
+            );
+          }
         },
       );
     } else {
       return GroupButton(
+        textAlign: TextAlign.center,
         selectedColor: Colors.grey[300],
         selectedTextStyle: TextStyle(color: Colors.black),
         spacing: 10,
@@ -385,10 +438,11 @@ class _FavoriteListState extends State<FavoriteList> {
         borderRadius: BorderRadius.circular(30),
         isRadio: true,
         buttons: value,
-        onSelected: (int index, bool isSelected) {Constant.alertBelumLogin(context);},
+        onSelected: (int index, bool isSelected) {LoginAlert.alertBelumLogin(context);},
       );
     }
   }
+
 
   /*------------ Fungsi Shared Preference Ambil Data User ------------*/
 
@@ -399,6 +453,42 @@ class _FavoriteListState extends State<FavoriteList> {
       return true;
     else
       return false;
+  }
+
+  Future<List<JadwalDokter>> cekCuti(Dokter dokter) async {
+    final now = DateTime.now();
+    final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
+    List dayList = List.generate(15, (index) => index)
+        .map((value) => DateFormat('dd')
+        .format(firstDayOfWeek.add(Duration(days: value))))
+        .toList();
+
+    /** MEMBUAT DAFTAR TAHUN DAN BULAN SAMPAI 15 HARI KEDEPAN **/
+    List yearMonthList = List.generate(15, (index) => index)
+        .map((value) => DateFormat('yyMM')
+        .format(firstDayOfWeek.add(Duration(days: value))))
+        .toList();
+
+    List<JadwalDokter> listJadwalDokter = await jadwalService.getJadwalDokterById(dokter.kodeDokter);
+
+    listJadwalDokter.forEach((jadwalDokter) {
+      jadwalDokter.jadwalPraktek.forEach((jadwal) async {
+        if (jadwalDokter.hari < now.weekday) {
+          bool isOnShift = await cutiService.cekCuti(jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari + 7] + dayList[jadwalDokter.hari + 7] + jadwal.jam.substring(0, 2));
+          if (isOnShift) {
+            /** Tambah keterangan cuti bila ditemukan jadwal pada tabel jadwal_cuti **/
+            jadwal.jam = jadwal.jam.substring(0, 5) + "\n(Dokter Cuti)";
+          }
+        }
+        else {
+          bool isOnShift = await cutiService.cekCuti(jadwalDokter.kodeDokter + "." + yearMonthList[jadwalDokter.hari] + dayList[jadwalDokter.hari] + jadwal.jam.substring(0, 2));
+          if (isOnShift)
+            /** Tambah keterangan cuti bila ditemukan jadwal pada tabel jadwal_cuti **/
+            jadwal.jam = jadwal.jam.substring(0, 5) + "\n(Dokter Cuti)";
+        }
+      });
+    });
+    return listJadwalDokter;
   }
   /*------------ Menampilkan Pasien Dan Metode Pembayaran Sebelum Daftar ------------*/
 
