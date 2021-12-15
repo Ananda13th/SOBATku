@@ -11,6 +11,7 @@ class DetailBanner extends StatelessWidget {
   DetailBanner({Key? key, required this.bannerModel, required this.keterangan});
 
   final BannerModel bannerModel;
+  /// Keterangan Ada 2, Banner atau "" ///
   final String keterangan;
 
   @override
@@ -96,11 +97,8 @@ class DetailScreen extends StatelessWidget {
         backgroundColor: Colors.black,
       ),
       body: Center(
-        child: Hero(
-          tag: 'imageHero',
-          child: PhotoView(
-            imageProvider: NetworkImage(image),
-          )
+        child: PhotoView(
+          imageProvider: NetworkImage(image),
         ),
       ),
     );
