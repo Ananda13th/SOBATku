@@ -81,28 +81,27 @@ class _DaftarNotifikasiState extends State<DaftarNotifikasi> {
     return ListView.separated(
       separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 2),
       itemCount: response.length,
-
       itemBuilder: (context, index) {
         Notifikasi tResp = response[index];
         return Row(
           children: <Widget>[
             Flexible(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration:  BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(12.0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  height: 80,
+                  decoration:  BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12.0),
+                    ),
+                  ),
+                  child: ListTile(
+                      title: Text(tResp.judul, style: TextStyle(fontSize: 18)),
+                      subtitle: Text(tResp.berita, style: TextStyle(fontSize: 16))
                   ),
                 ),
-                child: ListTile(
-
-                    title: Text(tResp.judul,),
-                    subtitle: Text(tResp.berita)
-                  ),
-                ),
-            )
+              )
             )
           ],
         );
