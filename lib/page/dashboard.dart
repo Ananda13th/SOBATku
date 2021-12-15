@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -27,7 +28,7 @@ class HomeView extends StatefulWidget {
 
 class HomeViewState extends State<HomeView> {
   List<String> listDokterFavorit =[""];
-  ScrollController scrollController = ScrollController();
+  ScrollController gridController = ScrollController();
   int currentIndex = 0;
   late BannerService bannerService;
   late DokterFavoritService dokterFavoritService;
@@ -41,188 +42,257 @@ class HomeViewState extends State<HomeView> {
   List<BannerModel> listBannerPromo = [];
   List<BannerModel> listBannerBerita = [];
   final CarouselController _controller = CarouselController();
+  late ScrollController _scrollController;
+  bool dibawah = false;
+  double paddingFab = 45;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     bannerService = BannerService();
     spesialisasiService = SpesialisasiService();
     dokterFavoritService = DokterFavoritService();
     bannerService.getBanner().then((value) {
-      setState(() {
-        listBanner = value;
-        listBanner.forEach((element) {
-          if(element.keterangan == "Banner")
-            listBannerUtama.add(element);
-          if(element.keterangan == "Promo")
-            listBannerPromo.add(element);
-          if(element.keterangan == "Berita")
-            listBannerBerita.add(element);
+      if(mounted)
+        setState(() {
+          listBanner = value;
+          listBanner.forEach((element) {
+            if(element.keterangan == "Banner")
+              listBannerUtama.add(element);
+            if(element.keterangan == "Promo")
+              listBannerPromo.add(element);
+            if(element.keterangan == "Berita")
+              listBannerBerita.add(element);
+          });
         });
-      });
     });
     getFavorit();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Sizer(
-      builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
-        return GestureDetector(
-          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: CustomScrollView(
-              slivers: <Widget>[
-                SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  backgroundColor: Colors.white,
-                  floating: true,
-                  pinned: true,
-                  elevation: 0,
-                  expandedHeight: 110,
-                  title: Row(
-                    children: [
-                     Container(
-                       height: 100,
-                       width: 200,
-                       child: Image.asset("assets/images/LogoRSBanner.png", fit: BoxFit.scaleDown)
-                     )
-                    ],
-                  ),
-                  bottom: AppBar(
-                      backgroundColor: Constant.color,
-                      title: Container(
-                        width: 240,
-                        height: 35,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: "Cari Layanan...",
-                            contentPadding: EdgeInsets.zero,
-                            prefixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
+    precacheImage(AssetImage("assets/images/error_picture.jpg"), context);
+
+    return FutureBuilder<bool>(
+        future: checkConnectivity(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if(snapshot.hasData) {
+            if(snapshot.data == true)
+              return Sizer(
+                  builder: (BuildContext context, Orientation orientation, DeviceType deviceType) {
+                    return GestureDetector(
+                      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                      child: Scaffold(
+                        resizeToAvoidBottomInset: false,
+                        body: NotificationListener<ScrollEndNotification>(
+                          onNotification: (scrollEnd) {
+                            var metrics;
+                            metrics = scrollEnd.metrics;
+                            if (metrics.atEdge) {
+                              if (metrics.pixels == 0)
+                                setState(() {
+                                  dibawah = false;
+                                });
+                              else
+                                setState(() {
+                                  dibawah = true;
+                                });
+                            }
+                            return true;
+                          },
+                          child: CustomScrollView(
+                              controller: _scrollController,
+                              slivers: <Widget>[
+                                SliverAppBar(
+                                  automaticallyImplyLeading: false,
+                                  backgroundColor: Colors.white,
+                                  floating: true,
+                                  pinned: true,
+                                  elevation: 0,
+                                  expandedHeight: 110,
+                                  title: Row(
+                                    children: [
+                                      Container(
+                                          height: 17.h,
+                                          width: 30.h,
+                                          child: Image.asset("assets/images/LogoRSBanner.png", fit: BoxFit.scaleDown)
+                                      )
+                                    ],
+                                  ),
+                                  bottom: AppBar(
+                                      backgroundColor: Constant.color,
+                                      title: Container(
+                                          width: 65.w,
+                                          height: 3.h,
+                                          /** Bila Search Bar, height:5.h **/
+                                          child: Text("Selamat Datang di Sobatku", style: TextStyle(fontSize: 18))
+                                        /** FUNGSI GLOBAL SEARCH BELUM ADA **/
+                                        // child: TextField(
+                                        //   decoration: InputDecoration(
+                                        //     hintText: "Cari Layanan...",
+                                        //     contentPadding: EdgeInsets.zero,
+                                        //     prefixIcon: Icon(Icons.search),
+                                        //     border: OutlineInputBorder(
+                                        //       borderRadius: BorderRadius.circular(20.0),
+                                        //     ),
+                                        //     filled: true,
+                                        //     fillColor: Colors.white,
+                                        //   ),
+                                        // ),
+                                      ),
+                                      actions: [
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DaftarNotifikasi()));
+                                                },
+                                                icon: Icon(Icons.notification_important)
+                                            ),
+                                            IconButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).push(
+                                                      new MaterialPageRoute(builder: (context) => new FavoriteList()));
+                                                },
+                                                icon: Icon(Icons.favorite)
+                                            ),
+                                          ],
+                                        )
+                                      ]
+                                  ),
+                                ),
+                                SliverToBoxAdapter(
+                                  child: Container(
+                                    decoration: BoxDecoration(image:
+                                    DecorationImage(
+                                        image: AssetImage("assets/images/Background.png"),
+                                        alignment: Alignment.center,
+                                        fit: BoxFit.fill)
+                                    ),
+                                    child: Column(
+                                      children: <Widget>[
+                                        SizedBox(height: 5,),
+                                        Container(
+                                            color: Colors.transparent,
+                                            height: 35.h,
+                                            child: buatCarousel(listBannerUtama)
+                                        ),
+                                        SizedBox(height: 5,),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Container(
+                                                  color: Colors.transparent,
+                                                  height: 29.h,
+                                                  child: tampilanMenuGeser(context)),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 5),
+                                        Center(
+                                          child: ScrollIndicator(
+                                            scrollController: gridController,
+                                            width: 20,
+                                            height: 10,
+                                            indicatorWidth: 20,
+                                            decoration: BoxDecoration(
+                                                color: Colors.lightGreen,
+                                                borderRadius: BorderRadius.all(Radius.circular(10)
+                                                )
+                                            ),
+                                            indicatorDecoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                                              color: Constant.color,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 15),
+                                        Text("Promo dan Layanan", style: TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 22)),
+                                        SizedBox(height: 5),
+                                        Container(
+                                            color: Colors.transparent,
+                                            height: 27.h,
+                                            child: promoLayanan(listBannerPromo)
+                                        ),
+                                        SizedBox(height: 15),
+                                        Text("Berita Kesehatan", style: TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 22)),
+                                        SizedBox(height: 5),
+                                        Container(
+                                            color: Colors.transparent,
+                                            height: 35.h,
+                                            child: buatCarousel(listBannerBerita)
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text("Hubungi dan Ikuti Kami", style: TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 18)),
+                                        SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            Expanded(child:  menuMediaSosial()),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ]
+                          ),
+                        ),
+                        floatingActionButton: Padding(
+                          padding: EdgeInsets.only(bottom: paddingFab),
+                          child: FloatingActionButton(
+                            mini: true,
+                            backgroundColor: Colors.black54,
+                            onPressed: (){
+                              !dibawah ?
+                              _scrollController.animateTo(
+                                _scrollController.position.maxScrollExtent,
+                                curve: Curves.easeOut,
+                                duration: const Duration(milliseconds: 500),
+                              )
+                                  :
+                              _scrollController.animateTo(
+                                _scrollController.position.minScrollExtent,
+                                curve: Curves.easeOut,
+                                duration: const Duration(milliseconds: 500),
+                              );
+                            },
+                            child: !dibawah ? Icon(Icons.keyboard_arrow_down_outlined) : Icon(Icons.keyboard_arrow_up_outlined),
                           ),
                         ),
                       ),
-                      actions: [
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                    new MaterialPageRoute(builder: (
-                                        context) => new DaftarNotifikasi()));
-                              },
-                              icon: Icon(Icons.notification_important)
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                    new MaterialPageRoute(builder: (
-                                        context) => new FavoriteList()));
-                              },
-                              icon: Icon(Icons.favorite)
-                            ),
-                          ],
-                        )
-                      ]
-                  ),
+                    );
+                  }
+              );
+            else
+              return Container(
+                color: Colors.white,
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset("assets/images/error_picture.jpg",
+                        fit: BoxFit.contain),
+                    Text("Maaf, Terjadi Kesalahan", style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 26)),
+                    Text("*Harap Cek Koneksi Internet Anda", style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18)),
+                  ],
                 ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    decoration: BoxDecoration(image:
-                    DecorationImage(
-                        image: AssetImage("assets/images/Background.png"),
-                        alignment: Alignment.center,
-                        fit: BoxFit.fill)),
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          color: Colors.transparent,
-                          height: 260,
-                          child: buatCarousel(listBannerUtama, "")
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                color: Colors.transparent,
-                                height: 210,
-                                width: MediaQuery.of(context).size.width,
-                                child: tampilanMenuGeser(context)),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 5),
-                        Center(
-                          child: ScrollIndicator(
-                            scrollController: scrollController,
-                            width: 20,
-                            height: 10,
-                            indicatorWidth: 20,
-                            decoration: BoxDecoration(
-                              color: Colors.lightGreen,
-                              borderRadius: BorderRadius.all(Radius.circular(10)
-                              )
-                            ),
-                            indicatorDecoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                              color: Constant.color,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text("Promo dan Layanan", style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                        SizedBox(height: 10),
-                        Container(
-                            color: Colors.transparent,
-                            height: 200,
-                            child: promoLayanan(listBannerPromo)
-                        ),
-                        SizedBox(height: 20),
-                        Text("Berita Kesehatan", style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                        SizedBox(height: 10),
-                        Container(
-                            color: Colors.transparent,
-                            height: 260,
-                            child: buatCarousel(listBannerBerita, "berita")
-                        ),
-                        SizedBox(height: 20),
-                        Text("Hubungi dan Ikuti Kami", style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 18)),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(child:  menuMediaSosial()),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ]
-            ),
-          ),
-        );
-      }
+              );
+          }
+          return Container();
+        }
     );
   }
 
-  /*------------ Carousel ------------*/
+  /// ------------ CAROUSEL ------------ ///
 
-  Widget buatCarousel(List<BannerModel> bannerList, String keterangan) {
+  Widget buatCarousel(List<BannerModel> bannerList) {
     return Column(
       children: [
         CarouselSlider(
@@ -230,17 +300,17 @@ class HomeViewState extends State<HomeView> {
             return Builder(
               builder: (BuildContext context) {
                 return Container(
-                    width: MediaQuery.of(context).size.width,
-                    margin: EdgeInsets.symmetric(horizontal: 5.0),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(5.0),
-                        child: InkWell(
-                          onTap: (){
-                            Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'Banner')));
-                          },
-                          child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
-                        )
+                  width: MediaQuery.of(context).size.width,
+                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(5.0),
+                    child: InkWell(
+                      onTap: (){
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'Banner')));
+                      },
+                      child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
                     )
+                  )
                 );
               },
             );
@@ -257,7 +327,7 @@ class HomeViewState extends State<HomeView> {
             }
           ),
         ),
-        //Index Carousel
+        /** INDEX BULLET CAROUSEL **/
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: bannerList.asMap().entries.map((entry) {
@@ -297,52 +367,52 @@ class HomeViewState extends State<HomeView> {
       "assets/images/Pemeriksaan_LAB.png",
       "assets/images/Fast_Track.png"];
     return GridView.count(
-        controller: scrollController,
-        shrinkWrap: true,
-        childAspectRatio: cardWidth / cardHeight,
-        crossAxisCount: 2,
-        scrollDirection: Axis.horizontal,
-        mainAxisSpacing: 5,
-        crossAxisSpacing: 3,
-        children: List.generate(icons.length, (index) {
-          return
-            Center(
-              child: Container(
-                color: Colors.transparent,
-                alignment: Alignment.center,
-                child:
-                SizedBox(
-                  child: Column(
-                    children: [
-                      InkWell(
-                        onTap: (){
-                          if(index == 0)
-                            Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DaftarDokter()));
-                          if(index == 1)
-                            bukaWhatsApp("Imunisasi");
-                          if(index == 2)
-                            bukaWhatsApp("MCU");
-                          if(index == 3)
-                            bukaWhatsApp("Klinik");
-                          if(index == 4)
-                            _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
-                        },
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          child: Image.asset(icons[index]),
-                        )
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(teks[index], style: TextStyle(color: Colors.black, fontSize:14, fontWeight: FontWeight.bold),)
-                    ],
-                  )
+      controller: gridController,
+      shrinkWrap: true,
+      childAspectRatio: cardWidth / cardHeight,
+      crossAxisCount: 2,
+      scrollDirection: Axis.horizontal,
+      mainAxisSpacing: 5,
+      crossAxisSpacing: 3,
+      children: List.generate(icons.length, (index) {
+        return
+          Center(
+            child: Container(
+              color: Colors.transparent,
+              alignment: Alignment.center,
+              child:
+              SizedBox(
+                child: Column(
+                  children: [
+                    InkWell(
+                      onTap: (){
+                        if(index == 0)
+                          Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DaftarDokter()));
+                        if(index == 1)
+                          bukaWhatsApp("Imunisasi");
+                        if(index == 2)
+                          bukaWhatsApp("MCU");
+                        if(index == 3)
+                          bukaWhatsApp("Klinik");
+                        if(index == 4)
+                          _launchURL("https://daftar.droensolobaru.com/booking/pribadi");
+                      },
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        child: Image.asset(icons[index]),
+                      )
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(teks[index], style: TextStyle(color: Colors.black, fontSize:14, fontWeight: FontWeight.bold),)
+                  ],
                 )
-              ),
-            );
-        })
+              )
+            ),
+          );
+      })
     );
   }
 
@@ -350,12 +420,21 @@ class HomeViewState extends State<HomeView> {
 
   Widget menuMediaSosial () {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+      padding: EdgeInsets.only(left: 5.w, right: 5.w),
       child: Row(
         children: [
           _icon(0, text: "Web", image: "assets/icons/WEB.png"),
+          SizedBox(
+            width: 10.w,
+          ),
           _icon(1, text: "Instagram", image: "assets/icons/IG.png"),
+          SizedBox(
+            width: 10.w,
+          ),
           _icon(2, text: "WhatsApp", image: "assets/icons/WA.png"),
+          SizedBox(
+            width: 10.w,
+          ),
           _icon(3, text: "Location", image: "assets/icons/LOC.png")
         ],
       ),
@@ -363,39 +442,34 @@ class HomeViewState extends State<HomeView> {
   }
 
   Widget _icon(int index, {required String text, required String image}) {
-    double padding;
-    if(MediaQuery.of(context).size.width < 410)
-      padding = MediaQuery.of(context).size.width*3.5/100;
-    else
-      padding = MediaQuery.of(context).size.width*4.1/100;
-    return Padding(
-      padding: EdgeInsets.all(padding),
-      child: InkResponse(
+    return InkResponse(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10),
         child: Column(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 7.h,
+              height: 7.h,
               child: Image.asset(image)
             ),
             Text(text, style: TextStyle(color:Colors.transparent, fontWeight: FontWeight.bold)),
           ],
         ),
-        onTap: (){
-          if(index == 0) {
-            _launchURL("https://droensolobaru.com/");
-          }
-          if(index == 1) {
-            _launchURL("https://instagram.com/droen_solobaru/");
-          }
-          if(index == 2) {
-            bukaWhatsApp("General");
-          }
-          if(index == 3) {
-            _launchURL("https://www.google.com/maps/place/RS+Dr.+OEN+SOLO+BARU/@-7.606801,110.7957897,17z/data=!3m1!4b1!4m5!3m4!1s0x2e7a3e2fabec7177:0xc073cd7a8c61f913!8m2!3d-7.606801!4d110.7979784");
-          }
-        },
       ),
+      onTap: (){
+        if(index == 0) {
+          _launchURL("https://droensolobaru.com/");
+        }
+        if(index == 1) {
+          _launchURL("https://instagram.com/droen_solobaru/");
+        }
+        if(index == 2) {
+          bukaWhatsApp("General");
+        }
+        if(index == 3) {
+          _launchURL("https://www.google.com/maps/place/RS+Dr.+OEN+SOLO+BARU/@-7.606801,110.7957897,17z/data=!3m1!4b1!4m5!3m4!1s0x2e7a3e2fabec7177:0xc073cd7a8c61f913!8m2!3d-7.606801!4d110.7979784");
+        }
+      },
     );
   }
 
@@ -406,7 +480,7 @@ class HomeViewState extends State<HomeView> {
       child: GridView.count(
         shrinkWrap: true,
         primary: false,
-        padding: const EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 15),
         scrollDirection: Axis.horizontal,
         crossAxisCount: 1,
           children: List.generate(listBanner.length, (index) {
@@ -466,6 +540,14 @@ class HomeViewState extends State<HomeView> {
     });
   }
 
+}
+
+Future<bool> checkConnectivity() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  if (connectivityResult == ConnectivityResult.none)
+    return false;
+  else
+    return true;
 }
 
 bukaWhatsApp(String kategori) async {
