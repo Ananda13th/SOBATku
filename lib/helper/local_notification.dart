@@ -12,7 +12,7 @@ class LocalNotification {
     final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     flutterLocalNotificationsPlugin.initialize(initialSetting);
 
-    // Daftar jenis notifikasi dari aplikasi.
+    /** Daftar Detail Notifikasi **/
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'default_notification_channel_id',
@@ -27,7 +27,7 @@ class LocalNotification {
     );
     const iOSDetails = IOSNotificationDetails();
     const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidDetails, iOS: iOSDetails);
-    // Menampilkan Notifikasi
+    /** Menampilkan Notifikasi **/
     await flutterLocalNotificationsPlugin.show(0, payload.notification!.title, payload.notification!.body, platformChannelSpecifics);
   }
 }
