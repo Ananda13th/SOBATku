@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
 import 'package:sobatku/helper/toastNotification.dart';
@@ -49,7 +50,7 @@ class TambahPasienState extends State<TambahPasien> {
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: Text("Daftar Pasien Baru"),
+            title: Text("Hubungkan Pasien"),
             backgroundColor: Constant.color,
           ),
           body: Container (
@@ -85,17 +86,20 @@ class TambahPasienState extends State<TambahPasien> {
                           ),
                           SizedBox(height: 5),
                           TextFormField(
+                            inputFormatters: [
+                              new LengthLimitingTextInputFormatter(6)
+                            ],
                             controller: noRmField,
                             keyboardType: TextInputType.number,
                             autovalidateMode: AutovalidateMode.onUserInteraction,
                             decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               icon: Icon(Icons.credit_card),
-                              labelText: 'Nomor Rekam Medis',
+                              labelText: '6 Digit Terakhir Nomor Rekam Medis',
                             ),
                             validator: (String? value) {
                               if (value == null || value.isEmpty) {
-                                return 'Mohon Isikan Nomor Rekam Medis Pasien';
+                                return 'Mohon Isikan 6 Digit Terakhir Nomor Rekam Medis';
                               }
                               return null;
                             },
@@ -139,14 +143,14 @@ class TambahPasienState extends State<TambahPasien> {
                                                 DialogButton(
                                                   onPressed: () {
                                                     pasienService.createPairing(noRmField.text, userId);
-                                                    ToastNotification.showNotification("Berhasil Menambah Pasien", context, Constant.color);
+                                                    ToastNotification.showNotification("Berhasil Menghubungkan Pasien", context, Constant.color);
                                                     Future.delayed(Duration(seconds: 2)).then((value) =>
                                                         Navigator.of(context).pushReplacement(
                                                             new MaterialPageRoute(builder: (context) => new MyApp()))
                                                     );
                                                   },
                                                   child: Text(
-                                                    "Lewati dan Simpan",
+                                                    "Lewati",
                                                     style: TextStyle(color: Colors.white, fontSize: 16, ),
                                                     textAlign: TextAlign.center,
                                                   ),
@@ -171,7 +175,7 @@ class TambahPasienState extends State<TambahPasien> {
                                                         });
                                                       }
                                                       else
-                                                        ToastNotification.showNotification("Nomor BPJS "+ value.toString(), context, Colors.red);
+                                                        ToastNotification.showNotification(value.toString(), context, Colors.red);
                                                     });
                                                   },
                                                   child: Text(
@@ -186,7 +190,7 @@ class TambahPasienState extends State<TambahPasien> {
                                       );
                                     }
                                   },
-                                  child: Text("DAFTAR"),
+                                  child: Text("Daftar"),
                                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Constant.color)),
                                 )
                               ),
