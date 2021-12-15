@@ -138,7 +138,7 @@ class SignInState extends State<SignIn> {
                                                 keyboardType: TextInputType.phone,
                                                 controller: noHpField,
                                                 decoration: const InputDecoration(
-                                                  hintText: "Isikan nomor HP terdaftar",
+                                                  hintText: "Isikan Nomor Yang HP Terdaftar",
                                                   border: OutlineInputBorder(),
                                                   prefixIcon: Padding(
                                                     padding: EdgeInsets.all(8.0),
@@ -172,11 +172,6 @@ class SignInState extends State<SignIn> {
                                               userService.sendOtp(noHp);
                                               Navigator.of(context).pushReplacement(
                                                   new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp, "reset")));
-
-                                              // userService.resetPassword(noHp).then((value) =>
-                                              //     ToastNotification.showNotification(value, context, Constant.color)
-                                              // );
-
                                             },
                                             child: Text(
                                               "Atur Ulang Password",
@@ -212,7 +207,8 @@ class SignInState extends State<SignIn> {
                                         List<String> data = [
                                           value.nomorHp,
                                           value.namaUser,
-                                          value.idUser.toString()
+                                          value.idUser.toString(),
+                                          value.email
                                         ];
                                         prefs.setStringList("user", data);
                                         prefs.setBool("userExist", true);
