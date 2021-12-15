@@ -1,34 +1,42 @@
 {
   "project_info": {
-    "project_number": "1015081345416",
-    "firebase_url": "https://flutter-fcm-2cfd1-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "flutter-fcm-2cfd1",
-    "storage_bucket": "flutter-fcm-2cfd1.appspot.com"
+    "project_number": "450202003307",
+    "firebase_url": "https://sobatku-59e37-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "sobatku-59e37",
+    "storage_bucket": "sobatku-59e37.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1015081345416:android:feeff5a373955bf2169a3d",
+        "mobilesdk_app_id": "1:450202003307:android:b79812158ced2449140e2e",
         "android_client_info": {
           "package_name": "com.droensoba.sobatku"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1015081345416-o2njafnrc0fhc5q4615t5mgdd9n20mu9.apps.googleusercontent.com",
+          "client_id": "450202003307-mlmfaiiv8r144822qsp6334fvsmtgddp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.droensoba.sobatku",
+            "certificate_hash": "d27f018c7d412e25196ee35990c0b23947a8fbd5"
+          }
+        },
+        {
+          "client_id": "450202003307-5bq891bre0focq4cfpeo019h4jg77ovt.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCwOelR7M8gc6mp3w75j5MorQ9PFWNMwmQ"
+          "current_key": "AIzaSyDAxgY5iDt4lYn8PuHYsWF-l6tEqDMHxTM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1015081345416-o2njafnrc0fhc5q4615t5mgdd9n20mu9.apps.googleusercontent.com",
+              "client_id": "450202003307-5bq891bre0focq4cfpeo019h4jg77ovt.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
