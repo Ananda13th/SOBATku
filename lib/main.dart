@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,7 +38,6 @@ class MyHttpOverrides extends HttpOverrides{
 class App extends StatelessWidget  {
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'SobatKu',
       theme: ThemeData(
@@ -106,6 +106,7 @@ Future<void> _messageHandler(RemoteMessage message) async {
   await cache.play("sounds/notification.mp3");
   await Firebase.initializeApp();
 }
+
 
 
 
