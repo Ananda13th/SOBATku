@@ -2,9 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:sobatku/helper/constant.dart';
-import 'package:sobatku/page/dashboard.dart';
 import 'package:sobatku/page/sign_in.dart';
-
 import 'halaman_utama.dart';
 
 class IntroScreen extends StatelessWidget {
