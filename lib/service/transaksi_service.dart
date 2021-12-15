@@ -33,7 +33,8 @@ class TransaksiService {
         print(obj);
         return obj['message'];
     } else {
-        throw Exception("Failed");
+      var obj = json.decode(response.body);
+        return obj['message'];
     }
   }
 }
