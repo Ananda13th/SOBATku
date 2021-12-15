@@ -6,7 +6,6 @@ import 'package:searchable_dropdown/searchable_dropdown.dart';
 import 'package:sobatku/helper/constant.dart';
 import 'package:sobatku/helper/day_converter.dart';
 import 'package:sobatku/helper/shared_preferences.dart';
-import 'package:sobatku/helper/toastNotification.dart';
 import 'package:sobatku/model/jadwal_dokter.dart';
 import 'package:sobatku/model/pasien.dart';
 import 'package:sobatku/model/spesialisasi.dart';
@@ -312,36 +311,3 @@ class _HomeState extends State<MyApp> {
   }
 }
 
-
-// _saveToFirebase(String idUser, Pasien pasien) async {
-//   await Firebase.initializeApp();
-//   final FirebaseFirestore _db = FirebaseFirestore.instance;
-//   FirebaseMessaging _fcm = FirebaseMessaging.instance;
-//   /** HAPUS SEMUA PASIEN PADA ID USER TERSEBUT UNTUK MENGHINDARI DUPLIKAT DATA & UPDATE DEVICE TOKEN**/
-//   var collection = await _db.collection("user").doc(idUser).collection("pasien").get();
-//   for(var doc in collection.docs) {
-//     doc.reference.delete();
-//   }
-//
-//   /** TAMBAH SEMUA PASIEN PADA ID USER TERSEBUT **/
-//   String? fcmToken = await _fcm.getToken();
-//
-//   if(fcmToken != null) {
-//
-//     var tokenRef = _db
-//         .collection('user')
-//         .doc(idUser)
-//         .collection('pasien')
-//         .doc(pasien.namaPasien);
-//
-//     await tokenRef.set({
-//       'token' : fcmToken,
-//       'no_rm'  : pasien.nomorRm,
-//       'createAt' : FieldValue.serverTimestamp(),
-//     });
-//
-//     await _db.collection("user").doc(idUser).set({
-//       'createAt' : FieldValue.serverTimestamp(),
-//     });
-//   }
-// }
