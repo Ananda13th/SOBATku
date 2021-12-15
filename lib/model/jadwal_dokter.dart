@@ -6,6 +6,7 @@ part 'jadwal_dokter.g.dart';
 class JadwalDokter {
   final String nama;
   final int hari;
+  final String foto;
   @JsonKey(name: "kode_dokter")
   final String kodeDokter;
   @JsonKey(name: "jadwal")
@@ -15,6 +16,7 @@ class JadwalDokter {
   JadwalDokter({
     required this.nama,
     required this.hari,
+    required this.foto,
     required this.kodeDokter,
     required this.jadwalPraktek,
     required this.aktif});
