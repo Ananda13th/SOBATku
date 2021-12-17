@@ -230,7 +230,7 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
   /// ------------ Menampilkan Pasien Dan Metode Pembayaran Sebelum Daftar ------------ ///
 
   Future<void> _buildPasienListDialog(BuildContext context, JadwalDokter jadwalDokter, String jam) async {
-    final now = DateTime.now();
+    // final now = DateTime.now();
     List<String> data = ["Asuransi", "Umum", "BPJS"];
     List<String> value = ["2", "3", "9"];
     String kodeJadwal = "";
@@ -242,21 +242,21 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
     /** PEMBUATAN KODE JADWAL **/
 
     /** MENGAMBIL TANGGAL HARI MINGGU SEBELUMNYA **/
-    final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
+    // final firstDayOfWeek = now.subtract(Duration(days: now.weekday));
 
     /** MEMBUAT DAFTAR TANGGAL SAMPAI 15 HARI KEDEPAN DIMULAI DARI AWAL MINGGU
      *  CONTOH : SEKARANG HARI SELASA TANGGAL 5, MAKA TANGGAL YANG DIGENERATE MULAI TANGGAL 3 SAMPAI 2 MINGGU KEDEPAN
      * **/
-    List dayList = List.generate(15, (index) => index)
-        .map((value) => DateFormat('dd')
-        .format(firstDayOfWeek.add(Duration(days: value))))
-        .toList();
+    // List dayList = List.generate(15, (index) => index)
+    //     .map((value) => DateFormat('dd')
+    //     .format(firstDayOfWeek.add(Duration(days: value))))
+    //     .toList();
 
     /** MEMBUAT DAFTAR TAHUN DAN BULAN SAMPAI 15 HARI KEDEPAN **/
-    List yearMonthList = List.generate(15, (index) => index)
-        .map((value) => DateFormat('yyMM')
-        .format(firstDayOfWeek.add(Duration(days: value))))
-        .toList();
+    // List yearMonthList = List.generate(15, (index) => index)
+    //     .map((value) => DateFormat('yyMM')
+    //     .format(firstDayOfWeek.add(Duration(days: value))))
+    //     .toList();
 
     /** MELAKUKAN CEK APAKAH TANGGAL JADWAL YANG DIPILIH MERUPAKAN HARI SEBELUM HARI INI
      *  CONTOH : BILA SEKARANG HARI SABTU, JADWAL YANG DIPILIH HARI SENIN, MAKA KODE JADWAL UNTUK TANGGAL DITAMBAH 7
@@ -459,7 +459,8 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                       if(tipe == "9") {
                                         /** MELAKUKAN PENGECEKAN APAKAH ADA RUJUKAN BPJS KE RUMAH SAKIT **/
                                         bpjsService.cekRujukan(noBpjs).then((value) {
-                                          if (value.toString() != "Rujukan Tidak Ada") {
+                                          print(value);
+                                          if (value.toString() == "aktif") {
                                             transaksiService.createTransaksi(transaksi, idUser).then((value) {
                                               Color color = Constant.color;
                                               if (value != "Antrian berhasil dibuat.")
@@ -589,7 +590,11 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                 onTap: (){showCalendar(context);},
                 child: TextField(
                   decoration: InputDecoration(
-                    icon: Icon(Icons.calendar_today),
+                    icon: Container (
+                      height: 40,
+                      width: 40,
+                      child: Image.asset("assets/icons/calendar.png", fit: BoxFit.scaleDown)
+                    ),
                     border: InputBorder.none,
                     labelText: 'Pilih Tanggal',
                   ),
