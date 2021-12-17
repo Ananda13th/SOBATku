@@ -40,7 +40,7 @@ class _DaftarNotifikasiState extends State<DaftarNotifikasi> {
       ),
       body: Column(
         children: <Widget>[
-          Flexible(
+          Expanded(
             child: Container(
               decoration: BoxDecoration(image:
               DecorationImage(
@@ -57,7 +57,12 @@ class _DaftarNotifikasiState extends State<DaftarNotifikasi> {
                     );
                   } else if (snapshot.hasData){
                     List<Notifikasi> response = snapshot.data;
-                    return _buildListView(response);
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: _buildListView(response),
+                      ),
+                    );
                   } else {
                     return Center(
                       child: Container(),
@@ -79,27 +84,36 @@ class _DaftarNotifikasiState extends State<DaftarNotifikasi> {
   Widget _buildListView(List<Notifikasi> response) {
 
     return ListView.separated(
-      separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 2),
+      separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.transparent, thickness: 1),
       itemCount: response.length,
       itemBuilder: (context, index) {
         Notifikasi tResp = response[index];
         return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 80,
-                  decoration:  BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12.0),
+              child: Container(
+                decoration:  BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(12.0),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black54,
+                      blurRadius: 4,
+                      offset: Offset(4, 8), // Shadow position
                     ),
-                  ),
-                  child: ListTile(
-                      title: Text(tResp.judul, style: TextStyle(fontSize: 18)),
-                      subtitle: Text(tResp.berita, style: TextStyle(fontSize: 16))
-                  ),
+                  ],
+                ),
+                child: ListTile(
+                    leading: Container(
+                      height: 50,
+                      child: Image.asset("assets/icons/notification-flat.png")
+                    ),
+                    title: Text(tResp.judul, style: TextStyle(fontSize: 18)),
+                    subtitle: Text(tResp.berita, style: TextStyle(fontSize: 16))
                 ),
               )
             )

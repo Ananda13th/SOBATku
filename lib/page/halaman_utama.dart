@@ -238,7 +238,12 @@ class _HomeState extends State<MyApp> {
                         ),
                         IconButton(
                             onPressed: (){showCalendar(context);},
-                            icon: Icon(Icons.calendar_today_outlined))
+                            icon:  Container (
+                                height: 50,
+                                width: 50,
+                                child: Image.asset("assets/icons/calendar.png", fit: BoxFit.scaleDown)
+                            )
+                        )
                       ],
                     ),
                     SizedBox(
@@ -262,8 +267,9 @@ class _HomeState extends State<MyApp> {
                               decoration: BoxDecoration(
                                 color:  Constant.color,
                                 borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(10.0),
-                                    bottomRight: Radius.circular(10.0)),
+                                  bottomLeft: Radius.circular(10.0),
+                                  bottomRight: Radius.circular(10.0)
+                                ),
                               ),
                               child: Text(
                                 "Cari",
