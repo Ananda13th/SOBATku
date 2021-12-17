@@ -13,10 +13,10 @@ class BpjsService {
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      if(data['error_code'] == "200" && data['data'].toString().toLowerCase() == "aktif")
+      if(data['error_code'] == "200" && data['message'].toString().toLowerCase() == "aktif")
         return "aktif";
       else
-        return data['message'].toString();
+        return data['message'];
     } else {
       throw Exception("Failed");
     }
@@ -29,7 +29,6 @@ class BpjsService {
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data);
       if(data['error_code'] == "200")
         return "aktif";
       else
