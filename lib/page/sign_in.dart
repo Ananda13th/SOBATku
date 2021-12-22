@@ -166,7 +166,7 @@ class SignInState extends State<SignIn> {
                                             onPressed: (){
                                               String noHp = noHpField.text;
                                               if(noHpField.text.substring(0,1) == "0")
-                                                noHp.replaceFirst(RegExp('0'), "+62");
+                                                noHp = noHp.replaceFirst(RegExp('0'), "+62");
                                               else
                                                 noHp = "+62" + noHpField.text;
                                               userService.sendOtp(noHp);
@@ -199,7 +199,7 @@ class SignInState extends State<SignIn> {
                                   } else {
                                     String noHp = noHpField.text;
                                     if(noHpField.text.substring(0,1) == "0")
-                                        noHp.replaceFirst(RegExp('0'), "+62");
+                                      noHp = noHp.replaceFirst(RegExp('0'), "+62", 0);
                                     else
                                       noHp = "+62" + noHpField.text;
                                     userService.getUser(noHp, passwordField.text).then((value) {
