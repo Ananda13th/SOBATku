@@ -26,14 +26,15 @@ class UserService {
       }
   }
 
-  Future<bool> createUser(User newUser) async {
+  Future<String> createUser(User newUser) async {
     final response = await http.post(
         Uri.parse(baseUrl + "user"),
         headers: URL.createHeader(),
         body: json.encode(newUser)
     );
     if(response.statusCode == 200) {
-        return true;
+      var result = json.decode(response.body);
+        return result["message"];
     } else {
         throw Exception("Failed");
     }
@@ -58,7 +59,7 @@ class UserService {
       headers: URL.createHeader(),
     );
     if(response.statusCode == 200) {
-      return "Berhasil Mengirim Password Ke Nomor Anda, Harap Tunggu";
+      return "Sukses Ubah Kata Sandi";
     } else {
       return "Terjadi Kesalahan";
     }
