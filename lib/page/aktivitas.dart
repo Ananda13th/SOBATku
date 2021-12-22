@@ -191,7 +191,7 @@ class _AktivitasState extends State<Aktivitas> {
 
   Widget _buildListAktivitas(List<TransaksiResp> response, String tipe) {
     return ListView.separated(
-        separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.black, thickness: 1),
+        separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.transparent, thickness: 1),
         itemCount: response.length,
         itemBuilder: (context, index) {
           TransaksiResp tResp = response[index];
@@ -200,8 +200,9 @@ class _AktivitasState extends State<Aktivitas> {
             child: Container(
               height: 245,
               child: Card(
-                color: tipe == "aktif" ? Constant.color.withOpacity(0.4) : Colors.grey,
+                color: tipe == "aktif" ? Colors.white : Colors.grey,
                 elevation: 10,
+                shadowColor:  tipe == "aktif" ? Colors.grey : Colors.black,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
                 ),
@@ -250,19 +251,9 @@ class _AktivitasState extends State<Aktivitas> {
                             child: Column(
                               children: [
                                 Text("No. Antrian Anda", style: TextStyle(fontSize: 13)),
-
-                                tipe == "aktif" ?
-                                  Text(tResp.antrian, style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold))
-                                :
-                                  Text("-", style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
-
+                                Text(tResp.antrian, style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold)),
                                 Text("Antrian Berjalan", style: TextStyle(fontSize: 13)),
-
-                                tipe == "aktif" ?
-                                  Text(tResp.antrian, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))
-                                :
-                                  Text("-", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-
+                                Text(tResp.antrianBerjalan, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                                 InkWell(
                                   onTap: () {
                                     _buildQr(context, tResp).then((value) => Screen.setBrightness(value));
