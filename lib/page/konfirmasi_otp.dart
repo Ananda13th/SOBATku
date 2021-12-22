@@ -295,9 +295,8 @@ class _TampilanKonfirmasiPinState extends State<TampilanKonfirmasiPin> {
                                         if (!_formKey.currentState!.validate()) {
                                           ToastNotification.showNotification('Harap Isi Semua Data', context, Colors.red)
                                         } else {
-                                          print("Sukses"),
-                                          userService.resetPassword(widget.phoneNumber.toString() , pwController.text),
-                                          Future.delayed(Duration(seconds: 3)).then((value) =>
+                                          userService.resetPassword(widget.phoneNumber.toString() , pwController.text).then((value) => ToastNotification.showNotification(value, context, Constant.color)),
+                                          Future.delayed(Duration(seconds: 1)).then((value) =>
                                               Navigator.of(context).pushReplacement(
                                                   new MaterialPageRoute(builder: (context) => new SignIn()))
                                           )
