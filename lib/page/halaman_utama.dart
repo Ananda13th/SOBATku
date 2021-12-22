@@ -159,7 +159,7 @@ class _HomeState extends State<MyApp> {
     if(index!=2) {
       setState(() {_currentIndex = index;});
     }
-    if(index !=0 && index !=1) {
+    if(index !=0) {
       SharedPreferenceHelper.checkUserExist().then((value){
         if(value == false)
           _currentIndex = 4;
@@ -197,24 +197,24 @@ class _HomeState extends State<MyApp> {
                     Row(
                       children: <Widget>[
                         Expanded(
-                            child: SearchableDropdown.single(
-                              items: itemList,
-                              displayClearIcon: false,
-                              isCaseSensitiveSearch: false,
-                              value: dropdownvalue,
-                              hint: "Pilih Spesialisasi",
-                              searchHint: "Pilih Spesialisasi",
-                              onChanged: (value) {
-                                setState(() {
-                                  dropdownvalue = value;
-                                  daftarSpesialisasi.forEach((spesialisasi) {
-                                    if(spesialisasi.namaSpesialisasi == dropdownvalue)
-                                      kodeSpesialisasi = spesialisasi.kodeSpesialisasi;
-                                  });
+                          child: SearchableDropdown.single(
+                            items: itemList,
+                            displayClearIcon: false,
+                            isCaseSensitiveSearch: false,
+                            value: dropdownvalue,
+                            hint: "Pilih Spesialisasi",
+                            searchHint: "Pilih Spesialisasi",
+                            onChanged: (value) {
+                              setState(() {
+                                dropdownvalue = value;
+                                daftarSpesialisasi.forEach((spesialisasi) {
+                                  if(spesialisasi.namaSpesialisasi == dropdownvalue)
+                                    kodeSpesialisasi = spesialisasi.kodeSpesialisasi;
                                 });
-                              },
-                              isExpanded: true,
-                            )
+                              });
+                            },
+                            isExpanded: true,
+                          )
                         )
                       ],
                     ),
