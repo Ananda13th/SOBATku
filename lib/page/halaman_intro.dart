@@ -38,12 +38,17 @@ class IntroScreen extends StatelessWidget {
                                   elevation: 8.0,
                                   child: Center(
                                     child: Container(
+                                      height: 40,
+                                      width: 150,
                                       decoration: BoxDecoration(
-                                          color:  Constant.color
+                                          color:  Constant.color,
+                                          borderRadius: BorderRadius.all(Radius.circular(5))
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text("Lanjut Ke Aplikasi"),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text("Lanjut ke Aplikasi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -80,15 +85,25 @@ class IntroScreen extends StatelessWidget {
           content: SingleChildScrollView(
             child: ListBody(
               children: const <Widget>[
-                Text('Untuk Pengguna Lama'),
-                Text('Harap Atur Ulang Password'),
-                Text('Untuk Masuk ke Aplikasi'),
+                Text(
+                  'Untuk pengguna lama, harap buat akun baru untuk masuk ke aplikasi',
+                  textAlign: TextAlign.justify,
+                  style: TextStyle(
+                    fontSize: 18
+                  ),
+                ),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Lanjutkan Sebagai Tamu'),
+              child: const Text(
+                'Lanjutkan Sebagai Tamu',
+                style: TextStyle(
+                fontWeight: FontWeight.bold,
+                    fontSize: 16
+                )
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
@@ -96,7 +111,13 @@ class IntroScreen extends StatelessWidget {
               },
             ),
             TextButton(
-              child: const Text('Masuk'),
+              child: const Text(
+                'Masuk',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16
+                )
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
