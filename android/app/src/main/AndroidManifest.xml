@@ -36,7 +36,7 @@
     </queries>
    <application
        tools:replace="android:label"
-        android:label="sobatku"
+        android:label="Dr. OEN SOBAtku"
         android:icon="@drawable/logo_rs">
 
         <activity
