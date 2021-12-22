@@ -61,6 +61,7 @@ dependencies:
   change_app_package_name: ^1.0.0
   syncfusion_flutter_barcodes: ^19.3.55
   connectivity_plus: ^2.1.0
+  cached_network_image: ^3.2.0
 
 dev_dependencies:
   build_runner: any
@@ -96,6 +97,7 @@ flutter:
     - assets/icons/Daftar_Periksa.png
     - assets/images/Fast_Track.png
     - assets/images/profileAvatar.png
+    - assets/ca/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
