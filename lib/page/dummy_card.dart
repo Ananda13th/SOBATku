@@ -53,7 +53,19 @@ class _DummyCardState extends State<DummyCard> {
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if(snapshot.hasError) {
                 return Container(
-                  color: Colors.white,
+                  decoration:  BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(12.0),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black,
+                        blurRadius: 4,
+                        offset: Offset(4, 8), // Shadow position
+                      ),
+                    ],
+                  ),
                   height: MediaQuery.of(context).size.height,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -130,7 +142,9 @@ class _DummyCardState extends State<DummyCard> {
                                         ),
                                         gradient:
                                         LinearGradient(
-                                            colors: [Color(0xFFc2e59c), Constant.color]
+                                            colors: Constant.color.toString() == "Color(0xff1f8d91)" ?
+                                            [Color.fromARGB(255, 162, 217, 212), Constant.color] :
+                                            [Color(0xFFc2e59c), Constant.color]
                                         ),
                                       ),
                                       child: Row(
