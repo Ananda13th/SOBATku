@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:intl/intl.dart';
 
 class URL {
-  static String urlAddress = "https://appbk01.droensolobaru.com/api/v1/";
+  static const String urlAddress = "https://appbk01.droensolobaru.com/api/v1/";
   // static String mockAddress = "http://192.167.4.32:3001/api/v1/";
   static const id = "ancient one";
   static const password = "secretkey";
@@ -19,10 +18,7 @@ class URL {
   }
 
   static String createXTimestamp() {
-    DateTime test = DateTime.parse("1970-01-01 00:00:00");
-    String now = DateFormat('yyyy-MM-dd hh:mm:ss').format(DateTime.now().toUtc());
-    var tStamp = DateTime.parse(now).millisecondsSinceEpoch - test.millisecondsSinceEpoch;
-    return tStamp.toString().substring(0,10);
+    return DateTime.now().toUtc().millisecondsSinceEpoch.toString().substring(0, 10);
   }
 
   static Map<String,String> createHeader() {
