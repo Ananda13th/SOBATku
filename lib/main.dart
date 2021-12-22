@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +13,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'helper/local_notification.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -22,16 +20,21 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(_messageHandler);
   await SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],
-  );// To turn off landscape mode
+  );
   HttpOverrides.global = new MyHttpOverrides();
   runApp(App());
 }
 
 class MyHttpOverrides extends HttpOverrides{
   @override
-  HttpClient createHttpClient(SecurityContext context){
+  HttpClient createHttpClient(SecurityContext context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+    ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+      if (host.isNotEmpty && host == 'appbk01.droensolobaru.com')
+        return true;
+      else
+        return false;
+    };
   }
 }
 
@@ -39,11 +42,11 @@ class App extends StatelessWidget  {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SobatKu',
+      title: 'SOBAtku',
       theme: ThemeData(
-          primaryColor: Constant.color,
-          accentColor: Constant.color,
-          buttonColor: Constant.color,
+        primaryColor: Constant.color,
+        accentColor: Constant.color,
+        buttonColor: Constant.color,
       ),
       home: Splash(),
     );
