@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
@@ -43,7 +44,29 @@ class DetailBanner extends StatelessWidget {
                                     return DetailScreen(image: bannerModel.url);
                                   }));
                                 },
-                                child: keterangan == "Banner" ? Image.network(bannerModel.urlDetailBanner.toString(), fit: BoxFit.fill) : Image.network(bannerModel.url, fit: BoxFit.fill)
+                                child: CachedNetworkImage(
+                                  imageUrl: keterangan == "Banner" ? bannerModel.urlDetailBanner.toString() : bannerModel.url,
+                                  imageBuilder: (context, imageProvider) => Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                  progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                      Center(
+                                        child: SizedBox(
+                                            height: 50,
+                                            width: 50,
+                                            child: CircularProgressIndicator(
+                                                value: downloadProgress.progress,
+                                                color : Constant.color
+                                            )
+                                        ),
+                                      ),
+                                  errorWidget: (context, url, error) => Icon(Icons.error),
+                                )
                               ),
                             ),
                           )
@@ -97,9 +120,35 @@ class DetailScreen extends StatelessWidget {
         backgroundColor: Colors.black,
       ),
       body: Center(
-        child: PhotoView(
-          imageProvider: NetworkImage(image),
-        ),
+        child: Container(
+          color: Colors.black,
+          child: PhotoView.customChild(
+            child: CachedNetworkImage(
+              imageUrl: image,
+              imageBuilder: (context, imageProvider) => Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.contain
+                  ),
+                ),
+              ),
+              progressIndicatorBuilder: (context, url, downloadProgress) =>
+              Center(
+                child: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: CircularProgressIndicator(
+                      value: downloadProgress.progress,
+                      color : Constant.color
+                  )
+                ),
+              ),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
+            minScale: PhotoViewComputedScale.contained * 1,
+          ),
+        )
       ),
     );
   }

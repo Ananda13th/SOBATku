@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -149,8 +150,8 @@ class _DaftarDokterState extends State<DaftarDokter> {
 
   /// ------------ Fungsi Tampil List Dokter ------------ ///
 
-  Widget _buildListDokter(List<Dokter> doctors) {
-    if(doctors.isEmpty)
+  Widget _buildListDokter(List<Dokter> daftarDokter) {
+    if(daftarDokter.isEmpty)
       return Container(
         child: Center(
             child: Container(
@@ -196,9 +197,9 @@ class _DaftarDokterState extends State<DaftarDokter> {
             height: MediaQuery.of(context).size.height*80/100,
             child: ListView.separated(
               separatorBuilder: (BuildContext context, int i) => Divider(color: Colors.transparent),
-              itemCount: doctors.length,
+              itemCount: daftarDokter.length,
               itemBuilder: (context, index) {
-                Dokter dokter = doctors[index];
+                Dokter dokter = daftarDokter[index];
                 return Padding(
                   padding: const EdgeInsets.only(left: 8, right: 8),
                   child: Container(
@@ -223,9 +224,21 @@ class _DaftarDokterState extends State<DaftarDokter> {
                           child: SizedBox(
                             width: 80,
                             height: 80,
-                            child: dokter.foto != "" ? CircleAvatar(
-                              backgroundImage: NetworkImage(dokter.foto),
-                            ) : Image.asset("assets/images/profileAvatar.png"),
+                            child: CachedNetworkImage(
+                              imageUrl: dokter.foto,
+                              imageBuilder: (context, imageProvider) =>
+                                  CircleAvatar(
+                                    backgroundImage: imageProvider,
+                                  ),
+                              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                  Center(
+                                    child: CircularProgressIndicator(
+                                        value: downloadProgress.progress,
+                                        color : Constant.color
+                                    ),
+                                  ),
+                              errorWidget: (context, url, error) =>   Image.asset("assets/images/profileAvatar.png"),
+                            )
                           ),
                         ),
                         Flexible(
@@ -301,9 +314,21 @@ class _DaftarDokterState extends State<DaftarDokter> {
                     child: Container(
                       height: 150,
                       width: 150,
-                      child: dokter.foto != "" ? CircleAvatar(
-                        backgroundImage: NetworkImage(dokter.foto),
-                      ) : Image.asset("assets/images/profileAvatar.png"),
+                      child: CachedNetworkImage(
+                        imageUrl: dokter.foto,
+                        imageBuilder: (context, imageProvider) =>
+                            CircleAvatar(
+                              backgroundImage: imageProvider,
+                            ),
+                        progressIndicatorBuilder: (context, url, downloadProgress) =>
+                            Center(
+                              child: CircularProgressIndicator(
+                                  value: downloadProgress.progress,
+                                  color : Constant.color
+                              ),
+                            ),
+                        errorWidget: (context, url, error) =>   Image.asset("assets/images/profileAvatar.png"),
+                      )
                     ),
                   ),
                   Row(

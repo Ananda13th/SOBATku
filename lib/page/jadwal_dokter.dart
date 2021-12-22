@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -149,9 +150,21 @@ class JadwalSpesifikState extends State<JadwalSpesifik> {
                                 child: SizedBox(
                                   width: 100,
                                   height: 100,
-                                  child: jadwalDokter.foto != "" ? CircleAvatar(
-                                    backgroundImage: NetworkImage(jadwalDokter.foto),
-                                  ) : Image.asset("assets/images/profileAvatar.png"),
+                                  child:  CachedNetworkImage(
+                                    imageUrl: jadwalDokter.foto,
+                                    imageBuilder: (context, imageProvider) =>
+                                        CircleAvatar(
+                                          backgroundImage: imageProvider,
+                                        ),
+                                    progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                        Center(
+                                          child: CircularProgressIndicator(
+                                              value: downloadProgress.progress,
+                                              color : Constant.color
+                                          ),
+                                        ),
+                                    errorWidget: (context, url, error) =>   Image.asset("assets/images/profileAvatar.png"),
+                                  )
                                 ),
                               ),
                               Flexible(

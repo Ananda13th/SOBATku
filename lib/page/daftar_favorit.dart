@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -149,6 +150,13 @@ class _FavoriteListState extends State<FavoriteList> {
                       borderRadius: BorderRadius.all(
                         Radius.circular(12.0),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey,
+                          blurRadius: 4,
+                          offset: Offset(4, 8), // Shadow position
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: <Widget>[
@@ -157,9 +165,21 @@ class _FavoriteListState extends State<FavoriteList> {
                           child: SizedBox(
                             width: 100,
                             height: 100,
-                            child: dokter.foto != "" ? CircleAvatar(
-                              backgroundImage: NetworkImage(dokter.foto),
-                            ) : Image.asset("assets/images/profileAvatar.png"),
+                            child: CachedNetworkImage(
+                              imageUrl: dokter.foto,
+                              imageBuilder: (context, imageProvider) =>
+                                  CircleAvatar(
+                                    backgroundImage: imageProvider,
+                                  ),
+                              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                  Center(
+                                    child: CircularProgressIndicator(
+                                        value: downloadProgress.progress,
+                                        color : Constant.color
+                                    ),
+                                  ),
+                              errorWidget: (context, url, error) =>   Image.asset("assets/images/profileAvatar.png"),
+                            )
                           ),
                         ),
                         Flexible(
@@ -205,9 +225,21 @@ class _FavoriteListState extends State<FavoriteList> {
                       child: Container(
                         height: 150,
                         width: 150,
-                        child: dokter.foto != "" ? CircleAvatar(
-                          backgroundImage: NetworkImage(dokter.foto),
-                        ) : Image.asset("assets/images/profileAvatar.png"),
+                        child: CachedNetworkImage(
+                          imageUrl: dokter.foto,
+                          imageBuilder: (context, imageProvider) =>
+                              CircleAvatar(
+                                backgroundImage: imageProvider,
+                              ),
+                          progressIndicatorBuilder: (context, url, downloadProgress) =>
+                              Center(
+                                child: CircularProgressIndicator(
+                                    value: downloadProgress.progress,
+                                    color : Constant.color
+                                ),
+                              ),
+                          errorWidget: (context, url, error) =>   Image.asset("assets/images/profileAvatar.png"),
+                        ),
                       ),
                     ),
                     Row(

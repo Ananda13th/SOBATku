@@ -18,6 +18,7 @@ import 'package:sobatku/service/jadwal_dokter_service.dart';
 import 'package:sobatku/service/spesialisasi_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whatsapp_unilink/whatsapp_unilink.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeView extends StatefulWidget {
   @override
@@ -126,7 +127,7 @@ class HomeViewState extends State<HomeView> {
                                           width: 65.w,
                                           height: 3.h,
                                           /** Bila Search Bar, height:5.h **/
-                                          child: Text("Selamat Datang di Sobatku", style: TextStyle(fontSize: 18))
+                                          child: Text("Selamat Datang di SOBAtku", style: TextStyle(fontSize: 18))
                                         /** FUNGSI GLOBAL SEARCH BELUM ADA **/
                                         // child: TextField(
                                         //   decoration: InputDecoration(
@@ -308,7 +309,53 @@ class HomeViewState extends State<HomeView> {
                       onTap: (){
                         Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new DetailBanner(bannerModel: item, keterangan: 'Banner')));
                       },
-                      child: item.deskripsi == "" ? Image.network((item.url), fit: BoxFit.scaleDown) : Image.network((item.url), fit: BoxFit.fill)
+                      child: item.deskripsi == "" ?
+                      CachedNetworkImage(
+                        imageUrl: item.url,
+                        imageBuilder: (context, imageProvider) => Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.scaleDown,
+                            ),
+                          ),
+                        ),
+                        progressIndicatorBuilder: (context, url, downloadProgress) =>
+                          Center(
+                            child: SizedBox(
+                                height: 100,
+                                width: 100,
+                                child: CircularProgressIndicator(
+                                  value: downloadProgress.progress,
+                                  color : Constant.color
+                                )
+                            ),
+                          ),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ) :
+                      CachedNetworkImage(
+                        imageUrl: item.url,
+                        imageBuilder: (context, imageProvider) => Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                        ),
+                        progressIndicatorBuilder: (context, url, downloadProgress) =>
+                          Center(
+                            child: SizedBox(
+                              height: 100,
+                              width: 100,
+                              child: CircularProgressIndicator(
+                                value: downloadProgress.progress,
+                                color : Constant.color
+                              )
+                            ),
+                          ),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      )
                     )
                   )
                 );
@@ -510,7 +557,29 @@ class HomeViewState extends State<HomeView> {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
-                                child: Image.network(listBanner[index].url, fit: BoxFit.fill)
+                                child:  CachedNetworkImage(
+                                  imageUrl: listBanner[index].url,
+                                  imageBuilder: (context, imageProvider) => Container(
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  ),
+                                  progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                      Center(
+                                        child: SizedBox(
+                                            height: 50,
+                                            width: 50,
+                                            child: CircularProgressIndicator(
+                                              value: downloadProgress.progress,
+                                              color : Constant.color
+                                            )
+                                        ),
+                                      ),
+                                  errorWidget: (context, url, error) => Icon(Icons.error),
+                                )
                               ),
                               // child: Image.asset(listBannerPromoTest[index]),
                             ),
