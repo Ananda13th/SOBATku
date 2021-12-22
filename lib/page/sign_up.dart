@@ -169,7 +169,7 @@ class SignUpState extends State<SignUp> {
                                     } else {
                                       String noHp = noHpField.text;
                                       if(noHpField.text.substring(0,1) == "0") {
-                                        noHp= noHp.replaceFirst("0", "+62");
+                                        noHp = noHp.replaceFirst("0", "+62");
                                       }
                                       else {
                                         noHp = "+62" + noHpField.text;
@@ -180,13 +180,13 @@ class SignUpState extends State<SignUp> {
                                           nomorHp: noHp,
                                           email: emailField.text);
                                       userService.createUser(user).then((value) {
-                                        if(value) {
+                                        if(value == "Success!") {
                                           userService.sendOtp(noHp);
                                           Navigator.of(context).pushReplacement(
                                             new MaterialPageRoute(builder: (context) => new TampilanKonfirmasiPin(noHp, "baru")));
                                         }
                                         else
-                                          ToastNotification.showNotification('Terjadi Kesalahan', context, Colors.red);
+                                          ToastNotification.showNotification(value, context, Colors.red);
                                         }
                                       );
                                     }
